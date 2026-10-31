@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "3d--room-customisation",
   "version": "1.0.0",
   "description": "cc hhhh\r sup",
@@ -18,6 +19,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
+=======
+  "dependencies": {
+>>>>>>> c047c86 (base)
     "three": "^0.187.0"
   }
 }
