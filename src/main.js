@@ -22,6 +22,7 @@ import {
 } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { buildCustomRoom } from "./custom_model.js";
 
 // ---------- Settings ----------
 // ---------- Furniture catalog ----------
@@ -97,7 +98,7 @@ if (SHOW_HELPERS) {
 }
 
 // ---------- Room ----------
-const W = 10, D = 10, H = 4, T = 0.2;
+let W = 10, D = 10, H = 4, T = 0.2;
 
 const floorMat = new MeshStandardMaterial({ color: 0x8b5a2b }); // wood brown
 const backMat  = new MeshStandardMaterial({ color: 0xd9e4f5 }); // light blue
@@ -121,12 +122,36 @@ function addWall(w, h, d, x, y, z, normal, material) {
   walls.push({ mesh, normal: new Vector3(...normal) });
 }
 
-addPart(W, T, D, 0, -T / 2, 0, floorMat); // floor, top surface at y = 0
+const savedRoom = sessionStorage.getItem("customRoom");
+let customRoom = null;
+if (savedRoom) {
+  try {
+    const { points, pillars } = JSON.parse(savedRoom);
+    if (Array.isArray(points) && points.length >= 3 && Array.isArray(pillars)) {
+      customRoom = buildCustomRoom(points, pillars);
+      const bounds = new Box3().setFromObject(customRoom);
+      W = bounds.max.x - bounds.min.x;
+      D = bounds.max.z - bounds.min.z;
+      H = bounds.max.y - bounds.min.y;
+      T = 0.2;
+      room.add(customRoom);
+      walls.push(...customRoom.userData.walls);
+      sessionStorage.removeItem("customRoom");
+    }
+  } catch (error) {
+    console.error("Could not load the custom room:", error);
+    sessionStorage.removeItem("customRoom");
+  }
+}
 
-addWall(W, H, T, 0, H / 2, -D / 2, [0, 0, -1], backMat);      // back
-addWall(W, H, T, 0, H / 2,  D / 2, [0, 0,  1], frontMat);     // front
-addWall(T, H, D - T, -W / 2, H / 2, 0, [-1, 0, 0], leftMat);  // left
-addWall(T, H, D - T,  W / 2, H / 2, 0, [ 1, 0, 0], rightMat); // right
+if (!customRoom) {
+  addPart(W, T, D, 0, -T / 2, 0, floorMat); // floor, top surface at y = 0
+
+  addWall(W, H, T, 0, H / 2, -D / 2, [0, 0, -1], backMat);      // back
+  addWall(W, H, T, 0, H / 2,  D / 2, [0, 0,  1], frontMat);     // front
+  addWall(T, H, D - T, -W / 2, H / 2, 0, [-1, 0, 0], leftMat);  // left
+  addWall(T, H, D - T,  W / 2, H / 2, 0, [ 1, 0, 0], rightMat); // right
+}
 
 scene.add(room);
 
@@ -139,7 +164,7 @@ function updateWallVisibility() {
   room.updateMatrixWorld();
   for (const { mesh, normal } of walls) {
     mesh.getWorldPosition(_wallPos);
-    _normal.copy(normal).transformDirection(room.matrixWorld);
+    _normal.copy(normal).transformDirection(mesh.parent.matrixWorld);
     _toCam.copy(camera.position).sub(_wallPos);
     mesh.visible = _toCam.dot(_normal) <= 0;
   }

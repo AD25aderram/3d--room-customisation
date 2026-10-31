@@ -1,27 +1,5 @@
 {
-<<<<<<< HEAD
-  "name": "3d--room-customisation",
-  "version": "1.0.0",
-  "description": "cc hhhh\r sup",
-  "homepage": "https://github.com/AD25aderram/3d--room-customisation#readme",
-  "bugs": {
-    "url": "https://github.com/AD25aderram/3d--room-customisation/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AD25aderram/3d--room-customisation.git"
-  },
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "devDependencies": {
-=======
   "dependencies": {
->>>>>>> c047c86 (base)
     "three": "^0.187.0"
   }
 }
