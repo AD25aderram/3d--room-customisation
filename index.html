@@ -29,13 +29,19 @@
         }
 
         h1{
-            position : absolute;
+            position: absolute;
+            top: 14px;
+            left: 0;
             width: 100%;
+            margin: 0;
 
-            z-index : -1;
+            font-size: 22px;
+            font-weight: 600;
+            color: #1d3557;
 
+            z-index: 5;            /* above the canvas */
+            pointer-events: none;  /* clicks pass through to the 3D scene */
         }
-
         #scene-container{
             position : absolute;
             width: 100%;
@@ -47,8 +53,7 @@
     </style>
 </head>
 <body>
-    <h1>discovering this </h1>
-    <div id="scene-container">
+    <h1>3D Room Customizer, see it before you buy it!</h1>    <div id="scene-container">
         <!-- ou canvas will be inserted here !-->
     </div>
 </body>

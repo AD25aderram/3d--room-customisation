@@ -4,6 +4,7 @@ const SCALE = 0.02;
 const WALL_H = 2.5;
 const WALL_T = 0.12;
 
+/** Builds a Three.js room group from canvas point arrays and pillar polygons in canvas coordinates. */
 export function buildCustomRoom(points, pillars) {
     const group = new THREE.Group();
     const walls = [];
@@ -76,5 +77,10 @@ export function buildCustomRoom(points, pillars) {
     });
 
     group.userData.walls = walls;
+    group.userData.pillars = pillars.map((pillar) =>
+        pillar.map(toVector).map((v) => ({ x: v.x, z: v.y }))
+    );
+    group.userData.outline = points.map(toVector).map((v) => ({ x: v.x, z: v.y }));
+    group.userData.wallThickness = WALL_T;
     return group;
 }
