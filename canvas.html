@@ -3,21 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Step 1 - Fullscreen canvas</title>
+    <title>Roomly | Draw your room</title>
     <style>
-        html, body {
-            margin: 0;              
-            height: 100%;
-            overflow: hidden;       
-        }
+        html, body { margin: 0; height: 100%; overflow: hidden; }
+        body { background: #f4eee5; font-family: Inter, system-ui, sans-serif; }
         canvas {
-            display: block;         
-            background: #ffffff;
+            display: block;
+            background-color: #fffdf9;
+            background-image:
+                linear-gradient(rgba(184, 91, 48, .13) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(184, 91, 48, .13) 1px, transparent 1px);
+            background-size: 50px 50px;
             cursor: crosshair;
         }
+        .instructions { position: fixed; top: 24px; left: 24px; max-width: 320px; padding: 18px 20px; color: #332b27; border: 1px solid rgba(87,65,48,.15); border-radius: 16px; background: rgba(255,253,249,.9); box-shadow: 0 10px 30px rgba(64,43,24,.12); pointer-events: none; }
+        .instructions strong { display: block; margin-bottom: 6px; color: #b85b30; }
+        .instructions span { color: #716961; font-size: .9rem; line-height: 1.4; }
+        .back { position: fixed; right: 24px; top: 24px; padding: 10px 14px; color: #55483f; border-radius: 10px; background: rgba(255,253,249,.9); text-decoration: none; }
+        .setup { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(244,238,229,.92); }
+        .setup-card { width: min(420px, 88vw); padding: 28px; color: #332b27; border-radius: 22px; background: #fffdf9; box-shadow: 0 20px 60px rgba(64,43,24,.18); }
+        .setup-card h1 { margin: 0 0 8px; font-size: 1.7rem; }
+        .setup-card p { margin: 0 0 22px; color: #716961; line-height: 1.45; }
+        .setup-card label { display: grid; gap: 8px; color: #55483f; font-weight: 600; }
+        .setup-card select { padding: 11px; border: 1px solid #d5c9bd; border-radius: 10px; background: #fff; font: inherit; }
+        .setup-card button { width: 100%; margin-top: 20px; padding: 12px; color: #fff; border: 0; border-radius: 10px; background: #b85b30; font: 700 1rem inherit; cursor: pointer; }
+        .setup-card button:hover { background: #984724; }
+        #pillar-count-wrap[hidden] { display: none; }
     </style>
 </head>
 <body>
+    <section class="setup" id="pillar-setup">
+        <form class="setup-card" id="pillar-form">
+            <h1>One quick detail.</h1>
+            <p>Does your room have pillars inside it? We’ll use your answer to guide the drawing.</p>
+            <label for="has-pillars">Pillars inside the room?
+                <select id="has-pillars" name="hasPillars">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+            </label>
+            <label id="pillar-count-wrap" for="pillar-count" hidden>How many pillars?
+                <select id="pillar-count" name="pillarCount">
+                    <option value="1">1 pillar</option>
+                    <option value="2">2 pillars</option>
+                    <option value="3">3 pillars</option>
+                    <option value="4">4 pillars</option>
+                    <option value="5">5 pillars</option>
+                </select>
+            </label>
+            <button type="submit">Start drawing <span aria-hidden="true">→</span></button>
+        </form>
+    </section>
+    <div class="instructions"><strong>Draw your room</strong><span>Click points to create the outline. Click the first point again to close it, then draw each pillar.</span></div>
+    <a class="back" href="mainpage.html">Exit</a>
     <canvas id="draw"></canvas>
     <script type="importmap">
     {

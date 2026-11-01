@@ -4,13 +4,31 @@ const ctx = canvas.getContext('2d');
 const GRID = 50;
 const snap = v => Math.round(v / GRID) * GRID;
 
-let numPillars = 2;       // how many pillars the user wants (temporary, we'll prompt later)
+let numPillars = 0;
 
 let points = [];          // room outline
 let isClosed = false;     // is the outline finished?
 
 let pillars = [];         // FINISHED pillars: a list of lists, e.g. [[p,p,p,p], [p,p,p,p]]
 let currentPillar = [];   // the pillar being drawn right now
+
+const setup = document.getElementById('pillar-setup');
+const pillarForm = document.getElementById('pillar-form');
+const hasPillars = document.getElementById('has-pillars');
+const pillarCountWrap = document.getElementById('pillar-count-wrap');
+const pillarCount = document.getElementById('pillar-count');
+
+hasPillars.addEventListener('change', () => {
+    pillarCountWrap.hidden = hasPillars.value !== 'yes';
+});
+
+pillarForm.addEventListener('submit', event => {
+    event.preventDefault();
+    numPillars = hasPillars.value === 'yes' ? Number.parseInt(pillarCount.value, 10) : 0;
+    sessionStorage.setItem('numPillars', String(numPillars));
+    setup.remove();
+    redraw();
+});
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
