@@ -24,6 +24,9 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { buildCustomRoom } from "./custom_model.js";
 
+
+
+
 // ---------- Settings ----------
 // ---------- Furniture catalog ----------
 // To add a new object later, push one more entry to this array.
@@ -40,8 +43,6 @@ const CATALOG = [
   { id: "lamp",    label: "Lamp",    path: "../models/lamp.glb",       height: 2.2 },
   { id: "desktop", label: "Desktop", path: "../models/desktop.glb",    width: 2 },
 ];
-const HOLD_MS = 1000;            // hold on the sofa this long to start dragging
-const MOVE_TOLERANCE = 8;        // px of movement that cancels the hold
 const SHOW_HELPERS = true;       // axes, grid, light and shadow helpers
 
 // ---------- Core setup ----------
@@ -346,7 +347,7 @@ async function addFurniture(entry) {
     showMessage(`Could not load ${entry.label}`);
   }
 }
-// ---------- Hold-to-drag ----------
+// ---------- Dragging (started from the right-click menu) ----------
 const raycaster = new Raycaster();
 const pointer = new Vector2();
 const floorPlane = new Plane(new Vector3(0, 1, 0), 0); // the plane y = 0
@@ -354,11 +355,7 @@ const hitPoint = new Vector3();
 const dragOffset = new Vector3();
 
 let dragging = false;
-let activeItem = null;  // the object being dragged
-let pendingItem = null; // the object under the pointer while the hold timer runs
-let holdTimer = null;
-let downX = 0;
-let downY = 0;
+let activeItem = null; // the object being dragged
 
 function setPointer(event) {
   const rect = renderer.domElement.getBoundingClientRect();
@@ -376,89 +373,67 @@ function pickFurniture() {
   return obj;
 }
 
-function cancelHold() {
-  clearTimeout(holdTimer);
-  holdTimer = null;
-  pendingItem = null;
-}
-
-function startDrag() {
-  holdTimer = null;
-  if (!pendingItem) return;
+function startDrag(item, event) {
+  setPointer(event);
   if (!raycaster.ray.intersectPlane(floorPlane, hitPoint)) return;
 
-  activeItem = pendingItem;
-  pendingItem = null;
+  activeItem = item;
   dragging = true;
-  orbit.enabled = false; // camera stops orbiting while an object is held
+  orbit.enabled = false; // camera stays still while an object is moved
   renderer.domElement.style.cursor = "grabbing";
-  dragOffset.copy(hitPoint).sub(activeItem.position); // no jump on grab
+  dragOffset.copy(hitPoint).sub(item.position); // keeps the object from jumping
+  showMessage("Click or press a key to drop (R rotates)");
 }
 
-function endDrag() {
-  cancelHold();
-  if (dragging) {
-    dragging = false;
-    activeItem = null;
-    renderer.domElement.style.cursor = "grab";
-  }
+function stopDrag() {
+  if (!dragging) return;
+  dragging = false;
+  activeItem = null;
   orbit.enabled = true;
+  renderer.domElement.style.cursor = "auto";
 }
 
-renderer.domElement.addEventListener("pointerdown", (event) => {
-  if (event.button !== 0) return;
-  setPointer(event);
-
-  const item = pickFurniture();
-  if (item) {
-    pendingItem = item;
-    downX = event.clientX;
-    downY = event.clientY;
-    holdTimer = setTimeout(startDrag, HOLD_MS);
-  }
-});
-
+// The object follows the mouse (floor only, inside the walls, no overlap)
 renderer.domElement.addEventListener("pointermove", (event) => {
+  if (!dragging) return;
   setPointer(event);
-
-  if (holdTimer && Math.hypot(event.clientX - downX, event.clientY - downY) > MOVE_TOLERANCE) {
-    cancelHold();
-  }
-
-  if (dragging) {
-    if (raycaster.ray.intersectPlane(floorPlane, hitPoint)) {
-      moveWithCollision(
-        activeItem,
-        hitPoint.x - dragOffset.x,
-        hitPoint.z - dragOffset.z
-      );
-    }
-  } else if (!holdTimer) {
-    renderer.domElement.style.cursor = pickFurniture() ? "grab" : "auto";
+  if (raycaster.ray.intersectPlane(floorPlane, hitPoint)) {
+    moveWithCollision(
+      activeItem,
+      hitPoint.x - dragOffset.x,
+      hitPoint.z - dragOffset.z
+    );
   }
 });
 
-renderer.domElement.addEventListener("pointerup", endDrag);
-renderer.domElement.addEventListener("pointercancel", endDrag);
+// Any click drops the object. OrbitControls ignores this click because it is
+// disabled at this moment, so the camera doesn't start orbiting.
+window.addEventListener("pointerdown", stopDrag);
 
-// Rotate the held object 90 degrees with R, only while dragging
 window.addEventListener("keydown", (event) => {
-  if (event.key.toLowerCase() !== "r" || event.repeat) return;
-  if (!dragging || !activeItem) return;
+  if (!dragging) return;
 
-  const oldRot = activeItem.rotation.y;
-  const oldX = activeItem.position.x;
-  const oldZ = activeItem.position.z;
+  // R rotates the held object by 90 degrees
+  if (event.key.toLowerCase() === "r" && !event.ctrlKey && !event.metaKey) {
+    if (event.repeat) return;
 
-  activeItem.rotation.y += Math.PI / 2;
-  clampToRoom(activeItem);
+    const oldRot = activeItem.rotation.y;
+    const oldX = activeItem.position.x;
+    const oldZ = activeItem.position.z;
 
-  if (overlapsOthers(activeItem)) {
-    // no room to turn here: undo
-    activeItem.rotation.y = oldRot;
-    activeItem.position.set(oldX, 0, oldZ);
-    showMessage("No room to rotate here");
+    activeItem.rotation.y += Math.PI / 2;
+    clampToRoom(activeItem);
+
+    if (overlapsOthers(activeItem)) {
+      // no room to turn here: undo
+      activeItem.rotation.y = oldRot;
+      activeItem.position.set(oldX, 0, oldZ);
+      showMessage("No room to rotate here");
+    }
+    return;
   }
+
+  stopDrag(); // any other key drops the object
 });
 
 
@@ -519,6 +494,91 @@ function buildAddMenu() {
   document.body.append(wrap);
 }
 buildAddMenu();
+
+
+// ---------- Right-click menu (Remove / Drag) ----------
+let ctxMenu = null;
+let ctxTarget = null; // the object the menu was opened on
+
+function removeFurniture(item) {
+  scene.remove(item);
+  const i = furniture.indexOf(item);
+  if (i !== -1) furniture.splice(i, 1);
+  // No dispose(): clones share geometry and materials with the cached model.
+}
+
+function closeContextMenu() {
+  if (ctxMenu) ctxMenu.hidden = true;
+  ctxTarget = null;
+}
+
+function openContextMenu(x, y, item) {
+  ctxTarget = item;
+  ctxMenu.hidden = false;
+
+  // keep the menu inside the window
+  const w = ctxMenu.offsetWidth, h = ctxMenu.offsetHeight;
+  ctxMenu.style.left = Math.min(x, window.innerWidth - w - 4) + "px";
+  ctxMenu.style.top = Math.min(y, window.innerHeight - h - 4) + "px";
+}
+
+function buildContextMenu() {
+  const style = document.createElement("style");
+  style.textContent = `
+    .ctx-menu { position: fixed; z-index: 20; width: 120px; background: #fff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.35); font-family: system-ui, sans-serif; overflow: hidden; }
+    .ctx-menu[hidden] { display: none; }
+    .ctx-menu button { display: block; width: 100%; padding: 8px 14px; border: 0; background: none; color: #222; text-align: left; font-size: 14px; cursor: pointer; }
+    .ctx-menu button:hover { background: #eef3fb; }
+    .ctx-menu button.danger { color: #c62828; }
+  `;
+  document.head.append(style);
+
+  ctxMenu = document.createElement("div");
+  ctxMenu.className = "ctx-menu";
+  ctxMenu.hidden = true;
+
+  const dragBtn = document.createElement("button");
+  dragBtn.textContent = "Drag";
+  dragBtn.addEventListener("click", (event) => {
+    const item = ctxTarget;
+    closeContextMenu();
+    if (item) startDrag(item, event);
+  });
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "Remove";
+  removeBtn.className = "danger";
+  removeBtn.addEventListener("click", () => {
+    const item = ctxTarget;
+    closeContextMenu();
+    if (item) removeFurniture(item);
+  });
+
+  ctxMenu.append(dragBtn, removeBtn);
+  document.body.append(ctxMenu);
+
+  // Right-click on an object opens the menu
+  renderer.domElement.addEventListener("contextmenu", (event) => {
+    event.preventDefault(); // no browser menu
+    if (dragging) return;
+
+    setPointer(event);
+    const item = pickFurniture();
+    if (item) openContextMenu(event.clientX, event.clientY, item);
+    else closeContextMenu();
+  });
+
+  // Close when clicking elsewhere or pressing Escape
+  window.addEventListener("pointerdown", (event) => {
+    if (!ctxMenu.contains(event.target)) closeContextMenu();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeContextMenu();
+  });
+}
+buildContextMenu();
+
+
 // ---------- Animation ----------
 function animate() {
   requestAnimationFrame(animate);
