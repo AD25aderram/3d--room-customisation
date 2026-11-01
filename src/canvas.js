@@ -1,7 +1,7 @@
 const canvas = document.getElementById('draw');
 const ctx = canvas.getContext('2d');
 
-const GRID = 50;
+const GRID = 25;
 const snap = v => Math.round(v / GRID) * GRID;
 const pixelsToMetres = pixels => pixels / GRID;
 
@@ -39,7 +39,7 @@ function resizeCanvas() {
 }
 
 function drawMeasurement(start, end, color, preview = false) {
-    const distance = pixelsToMetres(Math.hypot(end.x - start.x, end.y - start.y));
+    const distance = pixelsToMetres(Math.hypot(end.x - start.x, end.y - start.y) * 0.5);
     const label = `${distance.toFixed(1)} m`;
     const x = (start.x + end.x) / 2;
     const y = (start.y + end.y) / 2;
