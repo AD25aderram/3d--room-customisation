@@ -3,6 +3,7 @@ const ctx = canvas.getContext('2d');
 
 const GRID = 50;
 const snap = v => Math.round(v / GRID) * GRID;
+const pixelsToMetres = pixels => pixels / GRID;
 
 let numPillars = 0;
 
@@ -11,6 +12,7 @@ let isClosed = false;     // is the outline finished?
 
 let pillars = [];         // FINISHED pillars: a list of lists, e.g. [[p,p,p,p], [p,p,p,p]]
 let currentPillar = [];   // the pillar being drawn right now
+let mousePoint = null;
 
 const setup = document.getElementById('pillar-setup');
 const pillarForm = document.getElementById('pillar-form');
@@ -36,6 +38,34 @@ function resizeCanvas() {
     redraw();
 }
 
+function drawMeasurement(start, end, color, preview = false) {
+    const distance = pixelsToMetres(Math.hypot(end.x - start.x, end.y - start.y));
+    const label = `${distance.toFixed(1)} m`;
+    const x = (start.x + end.x) / 2;
+    const y = (start.y + end.y) / 2;
+
+    ctx.save();
+    ctx.font = '600 14px Inter, system-ui, sans-serif';
+    const padding = 5;
+    const textWidth = ctx.measureText(label).width;
+    ctx.fillStyle = 'rgba(255, 253, 249, .9)';
+    ctx.fillRect(x - textWidth / 2 - padding, y - 18, textWidth + padding * 2, 22);
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x, y - 7);
+    if (preview) {
+        ctx.setLineDash([6, 5]);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+    }
+    ctx.restore();
+}
+
 // Draw ONE shape (lines + dots) without clearing the canvas
 function drawShape(list, closed, color) {
     if (list.length > 1) {
@@ -45,6 +75,13 @@ function drawShape(list, closed, color) {
         ctx.strokeStyle = color;
         ctx.lineWidth = 3;
         ctx.stroke();
+
+        for (let i = 1; i < list.length; i++) {
+            drawMeasurement(list[i - 1], list[i], color);
+        }
+        if (closed) {
+            drawMeasurement(list[list.length - 1], list[0], color);
+        }
     }
     ctx.fillStyle = color;
     list.forEach(p => {
@@ -60,6 +97,11 @@ function redraw() {
     drawShape(points, isClosed, 'black');
     pillars.forEach(pillar => drawShape(pillar, true, 'orange'));   // finished pillars
     drawShape(currentPillar, false, 'orange');                      // the one in progress
+
+    const activeList = isClosed ? currentPillar : points;
+    if (activeList.length > 0 && mousePoint) {
+        drawMeasurement(activeList[activeList.length - 1], mousePoint, isClosed ? 'orange' : 'black', true);
+    }
 }
 
 function finishRoom() {
@@ -93,6 +135,16 @@ canvas.addEventListener('click', e => {
     }
 
     list.push(p);
+    redraw();
+});
+
+canvas.addEventListener('mousemove', e => {
+    mousePoint = { x: snap(e.clientX), y: snap(e.clientY) };
+    redraw();
+});
+
+canvas.addEventListener('mouseleave', () => {
+    mousePoint = null;
     redraw();
 });
 
