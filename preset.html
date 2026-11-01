@@ -16,6 +16,7 @@
         .field-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
         label { display:grid; gap:.55rem; color:var(--muted); font-size:.9rem; font-weight:600; }
         select, input { width:100%; padding:1rem; color:var(--ink); border:1px solid #514951; border-radius:12px; background:var(--panel); font:inherit; }
+        [hidden] { display:none !important; }
         select:focus, input:focus { border-color:var(--accent); outline:2px solid rgba(255,184,107,.2); }
         button { margin-top:.8rem; padding:1rem 1.2rem; color:#271d19; border:0; border-radius:12px; background:var(--accent); font:700 1rem inherit; cursor:pointer; }
         button:hover { background:#ffc98f; } @media(max-width:520px){.field-row{grid-template-columns:1fr;}}
@@ -28,19 +29,57 @@
         <p class="subtitle">Choose a foundation for your room. You can refine the space as you arrange it.</p>
         <form action="index.html">
             <label>Room shape
-                <select name="shape">
-                    <option>Rectangle</option>
-                    <option>Square</option>
-                    <option>L-shape</option>
-                    <option>Open plan</option>
+                <select name="shape" id="shape">
+                    <option value="rectangle">Rectangle</option>
+                    <option value="square">Square</option>
+                    <option value="cylinder">Cylinder</option>
+                    <option value="l-shape">L-shape</option>
+                    <option value="open-plan">Open plan</option>
                 </select>
             </label>
-            <div class="field-row">
+            <div class="field-row" id="rectangular-dimensions">
                 <label>Width <input type="number" name="width" value="10" min="1" step="0.5"> </label>
-                <label>Depth <input type="number" name="depth" value="10" min="1" step="0.5"> </label>
+                <label id="depth-field">Length <input type="number" name="depth" value="10" min="1" step="0.5"> </label>
+            </div>
+            <div id="square-dimensions" hidden>
+                <label>Length <input type="number" name="length" value="10" min="1" step="0.5" disabled> </label>
+            </div>
+            <div id="cylinder-dimensions" hidden>
+                <label>Radius <input type="number" name="radius" value="5" min="1" step="0.5" disabled> </label>
             </div>
             <button type="submit">Open room editor <span aria-hidden="true">→</span></button>
         </form>
     </main>
+    <script>
+        const shapeSelect = document.getElementById("shape");
+        const rectangularDimensions = document.getElementById("rectangular-dimensions");
+        const squareDimensions = document.getElementById("square-dimensions");
+        const cylinderDimensions = document.getElementById("cylinder-dimensions");
+        const rectangularInputs = rectangularDimensions.querySelectorAll("input");
+        const squareInput = squareDimensions.querySelector("input");
+        const cylinderInput = cylinderDimensions.querySelector("input");
+
+        function updateDimensions() {
+            const shape = shapeSelect.value;
+            const isSquare = shape === "square";
+            const isCylinder = shape === "cylinder";
+            const showRectangular = !isSquare && !isCylinder;
+
+            rectangularDimensions.hidden = !showRectangular;
+            squareDimensions.hidden = !isSquare;
+            cylinderDimensions.hidden = !isCylinder;
+            rectangularInputs.forEach((input) => {
+                input.disabled = !showRectangular;
+                input.required = showRectangular;
+            });
+            squareInput.disabled = !isSquare;
+            squareInput.required = isSquare;
+            cylinderInput.disabled = !isCylinder;
+            cylinderInput.required = isCylinder;
+        }
+
+        shapeSelect.addEventListener("change", updateDimensions);
+        updateDimensions();
+    </script>
 </body>
 </html>
