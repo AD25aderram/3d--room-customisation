@@ -27,14 +27,12 @@
         <a class="back" href="mainpage.html">← Back</a>
         <h1>Start with a shape.</h1>
         <p class="subtitle">Choose a foundation for your room. You can refine the space as you arrange it.</p>
-        <form action="index.html">
+        <form id="preset-form" action="index.html">
             <label>Room shape
                 <select name="shape" id="shape">
                     <option value="rectangle">Rectangle</option>
                     <option value="square">Square</option>
                     <option value="cylinder">Cylinder</option>
-                    <option value="l-shape">L-shape</option>
-                    <option value="open-plan">Open plan</option>
                 </select>
             </label>
             <div class="field-row" id="rectangular-dimensions">
@@ -51,6 +49,7 @@
         </form>
     </main>
     <script>
+        const presetForm = document.getElementById("preset-form");
         const shapeSelect = document.getElementById("shape");
         const rectangularDimensions = document.getElementById("rectangular-dimensions");
         const squareDimensions = document.getElementById("square-dimensions");
@@ -80,6 +79,13 @@
 
         shapeSelect.addEventListener("change", updateDimensions);
         updateDimensions();
+
+        presetForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const formData = new FormData(presetForm);
+            sessionStorage.setItem("presetRoom", JSON.stringify(Object.fromEntries(formData)));
+            window.location.href = presetForm.action;
+        });
     </script>
 </body>
 </html>

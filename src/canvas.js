@@ -105,6 +105,7 @@ function redraw() {
 }
 
 function finishRoom() {
+    sessionStorage.removeItem('presetRoom');
     sessionStorage.setItem('customRoom', JSON.stringify({ points, pillars }));
     window.location.href = 'index.html';
 }
