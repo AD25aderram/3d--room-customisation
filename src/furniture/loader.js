@@ -62,6 +62,9 @@ function buildFurniturePivot(source, entry) {
   model.rotation.y = entry.rotationY ?? 0;
   let box = new Box3().setFromObject(model);
   const size = box.getSize(new Vector3());
+  if (entry.file && (box.isEmpty() || !Number.isFinite(size.x) || size.x <= 0)) {
+    throw new Error("The GLB file has no usable model geometry");
+  }
   const scale = entry.height ? entry.height / size.y : entry.width / size.x;
   model.scale.setScalar(scale);
   box = new Box3().setFromObject(model);

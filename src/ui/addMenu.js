@@ -4,7 +4,7 @@ export function buildAddMenu(catalog, onAdd, onImport) {
   style.textContent = `
     .add-menu { position: fixed; top: 12px; left: 12px; z-index: 10; display: flex; gap: 6px; font-family: system-ui, sans-serif; }
     .add-menu > button { padding: 8px 14px; border: 0; border-radius: 6px; background: #fff; color: #222; font-size: 14px; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
-    .add-list { margin-top: 6px; width: 160px; max-height: 160px; overflow-y: auto; background: #fff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+    .add-list { position: absolute; top: 28px; left: 0; margin-top: 6px; width: 160px; max-height: 160px; overflow-y: auto; background: #fff; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
     .add-list[hidden] { display: none; }
     .add-list button { display: block; width: 100%; padding: 8px 14px; border: 0; background: none; color: #222; text-align: left; font-size: 14px; cursor: pointer; }
     .add-list button:hover { background: #eef3fb; }
@@ -35,6 +35,7 @@ export function buildAddMenu(catalog, onAdd, onImport) {
     });
     list.append(option);
   }
+
   for (const entry of catalog) addEntry(entry);
   button.addEventListener("click", () => (list.hidden = !list.hidden));
   importButton.addEventListener("click", () => fileInput.click());
