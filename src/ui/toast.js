@@ -6,10 +6,12 @@ export function showMessage(text) {
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
     document.body.append(toast);
   }
   toast.textContent = text;
-  toast.style.opacity = "1";
+  toast.classList.add("is-visible");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (toast.style.opacity = "0"), 2500);
+  toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 2500);
 }

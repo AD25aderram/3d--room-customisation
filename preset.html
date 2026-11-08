@@ -3,63 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roomly | Choose a preset</title>
+    <title>Roomly | Choose a room shape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="./src/styles/theme.css">
     <style>
-        :root { --ink:#f7f4ef; --muted:#a9a39d; --accent:#ffb86b; --panel:#252229; }
-        * { box-sizing: border-box; }
-        body { margin:0; min-height:100vh; display:grid; place-items:center; color:var(--ink); font-family:Inter,system-ui,sans-serif; background:linear-gradient(140deg,#17151a,#3a2a2d); }
-        .card { width:min(680px,92vw); padding:clamp(1.5rem,5vw,3.5rem); border:1px solid rgba(255,255,255,.13); border-radius:28px; background:rgba(31,29,34,.86); box-shadow:0 24px 80px rgba(0,0,0,.25); }
-        .back { color:var(--muted); text-decoration:none; } .back:hover { color:var(--accent); }
-        h1 { margin:2.5rem 0 .6rem; font-size:clamp(2.2rem,6vw,4rem); letter-spacing:-.06em; }
-        .subtitle { margin:0 0 2rem; color:var(--muted); line-height:1.5; }
-        form { display:grid; gap:1.3rem; }
-        .field-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-        label { display:grid; gap:.55rem; color:var(--muted); font-size:.9rem; font-weight:600; }
-        select, input { width:100%; padding:1rem; color:var(--ink); border:1px solid #514951; border-radius:12px; background:var(--panel); font:inherit; }
-        [hidden] { display:none !important; }
-        select:focus, input:focus { border-color:var(--accent); outline:2px solid rgba(255,184,107,.2); }
-        button { margin-top:.8rem; padding:1rem 1.2rem; color:#271d19; border:0; border-radius:12px; background:var(--accent); font:700 1rem inherit; cursor:pointer; }
-        button:hover { background:#ffc98f; } @media(max-width:520px){.field-row{grid-template-columns:1fr;}}
+        .page { width: min(1000px, 92vw); min-height: 100vh; margin: 0 auto; padding: clamp(1.5rem, 4vw, 3rem) 0; display: flex; flex-direction: column; }
+        .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: clamp(1.5rem, 6vh, 3.5rem); }
+        .back { color: var(--ink-soft); text-decoration: none; font-weight: 500; }
+        .back:hover { color: var(--pine); }
+        .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+        h1 { margin: 0 0 .5rem; font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; letter-spacing: -0.045em; }
+        .subtitle { margin: 1rem 0 1.75rem; color: var(--ink-soft); }
+        form { display: grid; gap: 1.4rem; }
+        fieldset { margin: 0; padding: 0; border: 0; }
+        legend, .field-label { margin-bottom: .5rem; padding: 0; color: var(--ink-soft); font-size: .9rem; font-weight: 600; }
+        .shapes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: var(--r-md); background: var(--plaster-deep); }
+        .shapes label { position: relative; }
+        .shapes input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+        .shapes span { display: block; padding: .65rem .5rem; border-radius: 9px; text-align: center; font-weight: 600; color: var(--ink-soft); transition: background .15s, color .15s; }
+        .shapes input:checked + span { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(27,36,40,.18); }
+        .shapes input:focus-visible + span { outline: 3px solid var(--brass); outline-offset: 1px; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .field { display: grid; gap: .45rem; font-weight: 600; font-size: .9rem; color: var(--ink-soft); }
+        .input-wrap { position: relative; }
+        .input-wrap input { width: 100%; min-height: 48px; padding: 0 2.6rem 0 .9rem; border: 1px solid rgba(27,36,40,.25); border-radius: var(--r-md); background: var(--paper); color: var(--ink); font: 500 1.05rem var(--font-ui); }
+        .input-wrap input:focus { border-color: var(--pine); outline: 3px solid rgba(30,91,76,.2); }
+        .input-wrap::after { content: "m"; position: absolute; right: .9rem; top: 50%; transform: translateY(-50%); color: var(--ink-soft); pointer-events: none; }
+        [hidden] { display: none !important; }
+        .preview { padding: 1.25rem; border-radius: 28px; background: var(--plaster-deep); }
+        .preview svg { display: block; width: 100%; height: auto; }
+        .readout { margin: .75rem 0 0; text-align: center; font: 700 1.1rem var(--font-display); letter-spacing: -0.02em; }
+        .readout small { display: block; font: 500 .85rem var(--font-ui); color: var(--ink-soft); letter-spacing: 0; }
+        @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } .preview { order: -1; } }
     </style>
 </head>
 <body>
-    <main class="card">
-        <a class="back" href="mainpage.html">← Back</a>
-        <h1>Start with a shape.</h1>
-        <p class="subtitle">Choose a foundation for your room. You can refine the space as you arrange it.</p>
-        <form id="preset-form" action="index.html">
-            <label>Room shape
-                <select name="shape" id="shape">
-                    <option value="rectangle">Rectangle</option>
-                    <option value="square">Square</option>
-                    <option value="cylinder">Cylinder</option>
-                </select>
-            </label>
-            <div class="field-row" id="rectangular-dimensions">
-                <label>Width <input type="number" name="width" value="10" min="1" step="0.5"> </label>
-                <label id="depth-field">Length <input type="number" name="depth" value="10" min="1" step="0.5"> </label>
+    <main class="page">
+        <div class="top">
+            <a class="wordmark" href="mainpage.html">Roomly</a>
+            <a class="back" href="mainpage.html">Back</a>
+        </div>
+        <div class="layout">
+            <div>
+                <h1>Pick a room shape.</h1>
+                <p class="subtitle">You can still add pieces and move them around once you're in the editor.</p>
+                <form id="preset-form" action="index.html">
+                    <fieldset>
+                        <legend>Shape</legend>
+                        <div class="shapes">
+                            <label><input type="radio" name="shape" value="rectangle" checked><span>Rectangle</span></label>
+                            <label><input type="radio" name="shape" value="square"><span>Square</span></label>
+                            <label><input type="radio" name="shape" value="cylinder"><span>Round</span></label>
+                        </div>
+                    </fieldset>
+                    <div class="field-row" id="rectangular-dimensions">
+                        <label class="field">Width <span class="input-wrap"><input type="number" name="width" value="10" min="1" step="0.5" inputmode="decimal"></span></label>
+                        <label class="field" id="depth-field">Length <span class="input-wrap"><input type="number" name="depth" value="10" min="1" step="0.5" inputmode="decimal"></span></label>
+                    </div>
+                    <div id="square-dimensions" hidden>
+                        <label class="field">Side length <span class="input-wrap"><input type="number" name="length" value="10" min="1" step="0.5" inputmode="decimal" disabled></span></label>
+                    </div>
+                    <div id="cylinder-dimensions" hidden>
+                        <label class="field">Radius <span class="input-wrap"><input type="number" name="radius" value="5" min="1" step="0.5" inputmode="decimal" disabled></span></label>
+                    </div>
+                    <button class="btn" type="submit">Open room editor</button>
+                </form>
             </div>
-            <div id="square-dimensions" hidden>
-                <label>Length <input type="number" name="length" value="10" min="1" step="0.5" disabled> </label>
+            <div class="preview" aria-hidden="true">
+                <svg id="preview-svg" viewBox="0 0 320 240"></svg>
+                <p class="readout" id="readout"></p>
             </div>
-            <div id="cylinder-dimensions" hidden>
-                <label>Radius <input type="number" name="radius" value="5" min="1" step="0.5" disabled> </label>
-            </div>
-            <button type="submit">Open room editor <span aria-hidden="true">→</span></button>
-        </form>
+        </div>
     </main>
     <script>
         const presetForm = document.getElementById("preset-form");
-        const shapeSelect = document.getElementById("shape");
+        const shapeInputs = presetForm.querySelectorAll('input[name="shape"]');
         const rectangularDimensions = document.getElementById("rectangular-dimensions");
         const squareDimensions = document.getElementById("square-dimensions");
         const cylinderDimensions = document.getElementById("cylinder-dimensions");
         const rectangularInputs = rectangularDimensions.querySelectorAll("input");
         const squareInput = squareDimensions.querySelector("input");
         const cylinderInput = cylinderDimensions.querySelector("input");
+        const previewSvg = document.getElementById("preview-svg");
+        const readout = document.getElementById("readout");
+
+        const currentShape = () => presetForm.elements.shape.value;
 
         function updateDimensions() {
-            const shape = shapeSelect.value;
+            const shape = currentShape();
             const isSquare = shape === "square";
             const isCylinder = shape === "cylinder";
             const showRectangular = !isSquare && !isCylinder;
@@ -75,9 +108,49 @@
             squareInput.required = isSquare;
             cylinderInput.disabled = !isCylinder;
             cylinderInput.required = isCylinder;
+            updatePreview();
         }
 
-        shapeSelect.addEventListener("change", updateDimensions);
+        const fmt = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+        const label = (x, y, text, anchor = "middle") =>
+            `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Figtree, system-ui, sans-serif" font-size="14" font-weight="600" fill="#4a565c">${text}</text>`;
+
+        function updatePreview() {
+            const shape = currentShape();
+            const box = { w: 220, h: 150 };
+            let body = "";
+            let text = "";
+            let area = 0;
+
+            if (shape === "cylinder") {
+                const r = Number(cylinderInput.value);
+                if (!(r > 0)) { previewSvg.innerHTML = ""; readout.textContent = ""; return; }
+                const rr = Math.min(box.h / 2, box.w / 2);
+                body = `<circle cx="160" cy="120" r="${rr}" fill="#f8f7f4" stroke="#1b2428" stroke-width="3"/>
+                        <line x1="160" y1="120" x2="${160 + rr}" y2="120" stroke="#c28a2c" stroke-width="2.5" stroke-dasharray="5 4"/>`
+                     + label(160 + rr / 2, 112, `${fmt(r)} m`);
+                area = Math.PI * r * r;
+                text = `Radius ${fmt(r)} m`;
+            } else {
+                const isSquare = shape === "square";
+                const w = Number(isSquare ? squareInput.value : rectangularInputs[0].value);
+                const d = Number(isSquare ? squareInput.value : rectangularInputs[1].value);
+                if (!(w > 0 && d > 0)) { previewSvg.innerHTML = ""; readout.textContent = ""; return; }
+                const k = Math.min(box.w / w, box.h / d);
+                const pw = w * k, pd = d * k;
+                const x = 160 - pw / 2, y = 120 - pd / 2;
+                body = `<rect x="${x}" y="${y}" width="${pw}" height="${pd}" fill="#f8f7f4" stroke="#1b2428" stroke-width="3"/>`
+                     + label(160, y - 10, `${fmt(w)} m`)
+                     + `<text x="${x + pw + 12}" y="${120 + 5}" font-family="Figtree, system-ui, sans-serif" font-size="14" font-weight="600" fill="#4a565c">${fmt(d)} m</text>`;
+                area = w * d;
+                text = `${fmt(w)} × ${fmt(d)} m`;
+            }
+            previewSvg.innerHTML = body;
+            readout.innerHTML = `${text}<small>${area.toFixed(1)} m² of floor</small>`;
+        }
+
+        shapeInputs.forEach((input) => input.addEventListener("change", updateDimensions));
+        presetForm.addEventListener("input", updatePreview);
         updateDimensions();
 
         presetForm.addEventListener("submit", (event) => {

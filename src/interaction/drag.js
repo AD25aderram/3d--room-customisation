@@ -33,7 +33,7 @@ export function installDrag({ renderer, camera, orbit, furniture, room }) {
     orbit.enabled = false;
     renderer.domElement.style.cursor = "grabbing";
     dragOffset.copy(hitPoint).sub(item.position);
-    showMessage("Click or press a key to drop (R rotates)");
+    showMessage("Click to drop it here. Press R to rotate.");
   }
   function stopDrag() {
     if (!dragging) return;
@@ -68,7 +68,7 @@ export function installDrag({ renderer, camera, orbit, furniture, room }) {
       if (!nudgeToFree(activeItem, 1.5, room, furniture)) {
         activeItem.rotation.y = oldRot;
         activeItem.position.set(oldX, 0, oldZ);
-        showMessage("No room to rotate here");
+        showMessage("No space to rotate here");
       }
       return;
     }

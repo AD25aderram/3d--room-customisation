@@ -4,45 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roomly | Draw your room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="./src/styles/theme.css">
     <style>
         html, body { margin: 0; height: 100%; overflow: hidden; }
-        body { background: #f4eee5; font-family: Inter, system-ui, sans-serif; }
+        /* Grid lines every 50px = 1 metre (strong) and every 25px = the snap step (faint). */
         canvas {
-            display: block;
-            background-color: #fffdf9;
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            background-color: var(--paper);
             background-image:
-                linear-gradient(rgba(184, 91, 48, .13) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(184, 91, 48, .13) 1px, transparent 1px);
-            background-size: 50px 50px;
+                linear-gradient(rgba(27,36,40,.10) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(27,36,40,.10) 1px, transparent 1px),
+                linear-gradient(rgba(27,36,40,.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(27,36,40,.045) 1px, transparent 1px);
+            background-size: 50px 50px, 50px 50px, 25px 25px, 25px 25px;
             cursor: crosshair;
         }
-        .instructions { position: fixed; top: 24px; left: 24px; max-width: 320px; padding: 18px 20px; color: #332b27; border: 1px solid rgba(87,65,48,.15); border-radius: 16px; background: rgba(255,253,249,.9); box-shadow: 0 10px 30px rgba(64,43,24,.12); pointer-events: none; }
-        .instructions strong { display: block; margin-bottom: 6px; color: #b85b30; }
-        .instructions span { color: #716961; font-size: .9rem; line-height: 1.4; }
-        .back { position: fixed; right: 24px; top: 24px; padding: 10px 14px; color: #55483f; border-radius: 10px; background: rgba(255,253,249,.9); text-decoration: none; }
-        .setup { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(244,238,229,.92); }
-        .setup-card { width: min(420px, 88vw); padding: 28px; color: #332b27; border-radius: 22px; background: #fffdf9; box-shadow: 0 20px 60px rgba(64,43,24,.18); }
-        .setup-card h1 { margin: 0 0 8px; font-size: 1.7rem; }
-        .setup-card p { margin: 0 0 22px; color: #716961; line-height: 1.45; }
-        .setup-card label { display: grid; gap: 8px; color: #55483f; font-weight: 600; }
-        .setup-card select { padding: 11px; border: 1px solid #d5c9bd; border-radius: 10px; background: #fff; font: inherit; }
-        .setup-card button { width: 100%; margin-top: 20px; padding: 12px; color: #fff; border: 0; border-radius: 10px; background: #b85b30; font: 700 1rem inherit; cursor: pointer; }
-        .setup-card button:hover { background: #984724; }
+        .panel {
+            position: fixed; top: 16px; left: 16px; z-index: 2; width: min(300px, calc(100% - 32px));
+            padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-lg);
+            background: rgba(248,247,244,.94); backdrop-filter: blur(10px); box-shadow: var(--shadow-1);
+        }
+        .panel .wordmark { display: inline-block; font-size: 1rem; margin-bottom: 10px; }
+        .panel h1 { margin: 0 0 4px; font-size: 1.35rem; font-weight: 800; }
+        .panel p { margin: 0; color: var(--ink-soft); font-size: .95rem; }
+        .panel .actions { display: flex; gap: 8px; margin-top: 14px; }
+        .panel .scale-note { margin-top: 12px; font-size: .8rem; }
+
+        .setup { position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; background: rgba(236,234,229,.9); backdrop-filter: blur(4px); }
+        .setup-card { width: min(420px, 90vw); padding: 28px; border: 1px solid var(--line); border-radius: 24px; background: var(--paper); box-shadow: var(--shadow-2); }
+        .setup-card h1 { margin: 0 0 8px; font-size: 1.9rem; font-weight: 800; }
+        .setup-card p { margin: 0 0 22px; color: var(--ink-soft); }
+        .setup-card label { display: grid; gap: 8px; margin-bottom: 14px; color: var(--ink-soft); font-weight: 600; font-size: .9rem; }
+        .setup-card select { min-height: 48px; padding: 0 12px; border: 1px solid rgba(27,36,40,.25); border-radius: var(--r-md); background: #fff; color: var(--ink); font: 500 1rem var(--font-ui); }
+        .setup-card .btn { width: 100%; margin-top: 8px; }
         #pillar-count-wrap[hidden] { display: none; }
     </style>
 </head>
 <body>
     <section class="setup" id="pillar-setup">
         <form class="setup-card" id="pillar-form">
-            <h1>One quick detail.</h1>
-            <p>Does your room have pillars inside it? We’ll use your answer to guide the drawing.</p>
-            <label for="has-pillars">Pillars inside the room?
+            <h1>Any pillars in the room?</h1>
+            <p>Pillars show up in 3D and furniture can't be placed through them, so you'll mark them after the outline.</p>
+            <label for="has-pillars">Pillars inside the room
                 <select id="has-pillars" name="hasPillars">
-                    <option value="no">No</option>
-                    <option value="yes">Yes</option>
+                    <option value="no">No pillars</option>
+                    <option value="yes">Yes, there are pillars</option>
                 </select>
             </label>
-            <label id="pillar-count-wrap" for="pillar-count" hidden>How many pillars?
+            <label id="pillar-count-wrap" for="pillar-count" hidden>How many pillars
                 <select id="pillar-count" name="pillarCount">
                     <option value="1">1 pillar</option>
                     <option value="2">2 pillars</option>
@@ -51,11 +63,21 @@
                     <option value="5">5 pillars</option>
                 </select>
             </label>
-            <button type="submit">Start drawing <span aria-hidden="true">→</span></button>
+            <button class="btn" type="submit">Start drawing</button>
         </form>
     </section>
-    <div class="instructions"><strong>Draw your room</strong><span>Click points to create the outline. Measurements are shown in metres as you draw. Click the first point again to close it, then draw each pillar.</span></div>
-    <a class="back" href="mainpage.html">Exit</a>
+
+    <aside class="panel" aria-live="polite">
+        <a class="wordmark" href="mainpage.html">Roomly</a>
+        <h1 id="step-title">Room outline</h1>
+        <p id="step-hint">Click to place the first corner.</p>
+        <div class="actions">
+            <button type="button" class="btn btn--quiet btn--small" id="undo-btn" disabled>Undo</button>
+            <button type="button" class="btn btn--quiet btn--small" id="reset-btn" disabled>Start over</button>
+        </div>
+        <p class="scale-note">Each square is 1 metre. Corners snap to half a metre.</p>
+    </aside>
+
     <canvas id="draw"></canvas>
     <script type="importmap">
     {

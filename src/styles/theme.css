@@ -1,0 +1,72 @@
+/* Roomly shared design tokens and base styles. Linked by every page. */
+:root {
+  --plaster: #eceae5;
+  --plaster-deep: #ddd9d0;
+  --paper: #f8f7f4;
+  --ink: #1b2428;
+  --ink-soft: #4a565c;
+  --line: rgba(27, 36, 40, 0.14);
+  --pine: #1e5b4c;
+  --pine-deep: #164538;
+  --brass: #c28a2c;
+  --danger: #b3261e;
+
+  --r-lg: 20px;
+  --r-md: 12px;
+  --r-sm: 8px;
+  --shadow-1: 0 1px 2px rgba(27, 36, 40, 0.08), 0 6px 20px rgba(27, 36, 40, 0.1);
+  --shadow-2: 0 2px 4px rgba(27, 36, 40, 0.1), 0 18px 48px rgba(27, 36, 40, 0.16);
+
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--plaster);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.05; letter-spacing: -0.03em; }
+
+:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--pine);
+  color: #fff;
+  font: 600 1rem var(--font-ui);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.btn:hover { background: var(--pine-deep); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn--quiet { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn--quiet:hover { background: rgba(27, 36, 40, 0.06); }
+.btn--small { min-height: 36px; padding: 0 0.9rem; font-size: 0.875rem; }
+
+.wordmark {
+  font: 800 1.25rem var(--font-display);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

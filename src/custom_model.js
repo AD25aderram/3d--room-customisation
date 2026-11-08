@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { makeFloorMaterial, makePillarMaterial, makeWallMaterials } from './room/materials.js';
 
 const SCALE = 0.02;
 const WALL_H = 2.5;
@@ -28,13 +29,13 @@ export function buildCustomRoom(points, pillars) {
 
     const floor = new THREE.Mesh(
         new THREE.ShapeGeometry(floorShape),
-        new THREE.MeshStandardMaterial({ color: 0xbfae93, side: THREE.DoubleSide })
+        makeFloorMaterial()
     );
     floor.rotation.x = Math.PI / 2;
     floor.receiveShadow = true;
     group.add(floor);
 
-    const wallMaterial = new THREE.MeshStandardMaterial({ color: 0xf0f0f0 });
+    const wallMaterial = makeWallMaterials();
     for (let i = 0; i < points.length; i++) {
         const a = toVector(points[i]);
         const b = toVector(points[(i + 1) % points.length]);
@@ -60,7 +61,7 @@ export function buildCustomRoom(points, pillars) {
         });
     }
 
-    const pillarMaterial = new THREE.MeshStandardMaterial({ color: 0xe08a2e });
+    const pillarMaterial = makePillarMaterial();
     pillars.forEach((pillar) => {
         const mesh = new THREE.Mesh(
             new THREE.ExtrudeGeometry(new THREE.Shape(pillar.map(toVector)), {

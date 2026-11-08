@@ -6,6 +6,7 @@ import { findFreeSpot } from "./furniture/placement.js";
 import { createFurnitureStore } from "./furniture/store.js";
 import { updateWallVisibility } from "./room/wallVisibility.js";
 import { installDrag } from "./interaction/drag.js";
+import { installHover } from "./interaction/hover.js";
 import { installContextMenu } from "./interaction/contextMenu.js";
 import { buildAddMenu } from "./ui/addMenu.js";
 import { showMessage } from "./ui/toast.js";
@@ -21,11 +22,6 @@ const {
   centerX,
   centerZ,
 } = createScene(container, room);
-console.log("room data:", {
-  outline: room.userData.outline,
-  roomPillars: room.userData.pillars ?? [],
-  roomWallT: room.userData.wallThickness ?? 0.12,
-});
 const collisionRoom = {
   outline: room.userData.outline,
   pillars: room.userData.pillars ?? [],
@@ -34,13 +30,31 @@ const collisionRoom = {
   centerX,
   centerZ,
 };
-const store = createFurnitureStore();
+
+// Floor area in m² (scene units are metres), minus pillars, plus a live piece count.
+const polygonArea = (polygon) =>
+  Math.abs(polygon.reduce((sum, p, i) => {
+    const q = polygon[(i + 1) % polygon.length];
+    return sum + p.x * q.z - q.x * p.z;
+  }, 0)) / 2;
+const floorArea =
+  polygonArea(collisionRoom.outline) -
+  collisionRoom.pillars.reduce((sum, pillar) => sum + polygonArea(pillar), 0);
+const meta = document.getElementById("room-meta");
+function updateMeta(items = []) {
+  if (!meta) return;
+  const count = items.length;
+  meta.textContent = `${floorArea.toFixed(1)} m² · ${count} ${count === 1 ? "piece" : "pieces"}`;
+}
+updateMeta();
+
+const store = createFurnitureStore(updateMeta);
 const furniture = store.items;
 
 function placeFurniture(pivot, entry) {
   const spot = findFreeSpot(pivot, collisionRoom, furniture);
   if (!spot) {
-    showMessage(`Not enough space for ${entry.label}`);
+    showMessage(`No free floor left for the ${entry.label.toLowerCase()}`);
     return;
   }
   pivot.rotation.y = spot.rot;
@@ -90,7 +104,23 @@ async function importFurniture(file, addEntry) {
 
 buildAddMenu(CATALOG, addFurniture, importFurniture);
 const drag = installDrag({ renderer, camera, orbit, scene, furniture, room: collisionRoom });
-installContextMenu({ renderer, furniture, scene, drag, store });
+installHover({ renderer, scene, drag });
+installContextMenu({ renderer, furniture, scene, drag, store, room: collisionRoom });
+
+// "Reset view" returns the camera to where it started.
+const home = { position: camera.position.clone(), target: orbit.target.clone() };
+document.getElementById("reset-view")?.addEventListener("click", () => {
+  camera.position.copy(home.position);
+  orbit.target.copy(home.target);
+  orbit.update();
+});
+
+// The hint goes away once the person finds the menu, or after a while.
+const hint = document.getElementById("hint");
+const dismissHint = () => hint?.classList.add("is-done");
+renderer.domElement.addEventListener("contextmenu", dismissHint, { once: true });
+renderer.domElement.addEventListener("dblclick", dismissHint, { once: true });
+setTimeout(dismissHint, 20000);
 
 function animate() {
   requestAnimationFrame(animate);

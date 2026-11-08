@@ -3,68 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roomly | Design your room</title>
+    <title>Roomly | See the room before you buy the furniture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="./src/styles/theme.css">
     <style>
-        :root {
-            color-scheme: dark;
-            --ink: #f7f4ef;
-            --muted: #b7b2aa;
-            --accent: #ffb86b;
-            --accent-dark: #d97638;
-            --panel: rgba(31, 29, 34, 0.78);
-        }
-
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
+        .home {
+            width: min(1180px, 92vw);
             min-height: 100vh;
+            margin: 0 auto;
+            padding: clamp(1.5rem, 4vw, 3rem) 0;
             display: grid;
-            place-items: center;
-            color: var(--ink);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-            background:
-                radial-gradient(circle at 75% 15%, rgba(255, 184, 107, .25), transparent 30%),
-                linear-gradient(135deg, #17151a 0%, #27232a 55%, #3b2b2c 100%);
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+            gap: clamp(2rem, 5vw, 5rem);
+            align-items: center;
         }
+        .intro .wordmark { display: inline-block; margin-bottom: clamp(2rem, 8vh, 5rem); }
+        h1 { margin: 0 0 1.25rem; font-size: clamp(2.6rem, 6vw, 4.8rem); font-weight: 800; letter-spacing: -0.045em; }
+        .lede { max-width: 30rem; margin: 0 0 2.25rem; color: var(--ink-soft); font-size: 1.15rem; }
+        .start { display: grid; gap: 12px; max-width: 30rem; }
+        .start-card {
+            display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: center;
+            padding: 16px 18px; color: var(--ink); text-decoration: none;
+            border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper);
+            transition: border-color .15s, transform .15s, box-shadow .15s;
+        }
+        .start-card:hover { border-color: var(--pine); transform: translateY(-2px); box-shadow: var(--shadow-1); }
+        .start-card--primary { background: var(--pine); border-color: var(--pine); color: #fff; }
+        .start-card--primary:hover { background: var(--pine-deep); }
+        .start-icon {
+            display: grid; place-items: center; width: 52px; height: 52px;
+            border-radius: 14px; background: var(--plaster); color: var(--pine);
+        }
+        .start-card--primary .start-icon { background: rgba(255,255,255,.14); color: #fff; }
+        .start-title { display: block; font: 700 1.15rem var(--font-display); letter-spacing: -0.02em; }
+        .start-sub { display: block; margin-top: 2px; font-size: .95rem; color: var(--ink-soft); }
+        .start-card--primary .start-sub { color: rgba(255,255,255,.82); }
 
-        main {
-            width: min(1120px, 92vw);
-            padding: clamp(2rem, 6vw, 5rem) 0;
+        .hero-art { border-radius: 32px; background: var(--plaster-deep); padding: clamp(.5rem, 2vw, 1.5rem); }
+        .hero-art svg { display: block; width: 100%; height: auto; }
+        .hero-art .piece { animation: place .8s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.35s + var(--i) * .16s); }
+        @keyframes place { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: none; } }
+
+        @media (max-width: 860px) {
+            .home { grid-template-columns: 1fr; min-height: 0; }
+            .intro .wordmark { margin-bottom: 2rem; }
         }
-        .brand { color: var(--accent); font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-        h1 { max-width: 720px; margin: 1.25rem 0 1rem; font-size: clamp(3rem, 8vw, 6.7rem); line-height: .94; letter-spacing: -.07em; }
-        .intro { max-width: 550px; margin: 0 0 3rem; color: var(--muted); font-size: 1.1rem; line-height: 1.6; }
-        .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; max-width: 850px; }
-        .choice {
-            min-height: 225px; padding: 1.7rem; display: flex; flex-direction: column; justify-content: space-between;
-            color: inherit; text-decoration: none; border: 1px solid rgba(255,255,255,.13); border-radius: 24px;
-            background: var(--panel); backdrop-filter: blur(14px); transition: transform .2s, border-color .2s, background .2s;
-        }
-        .choice:hover, .choice:focus-visible { transform: translateY(-6px); border-color: var(--accent); background: rgba(55, 48, 51, .9); outline: none; }
-        .choice-number { color: var(--accent); font-size: .82rem; font-weight: 700; letter-spacing: .1em; }
-        h2 { margin: 1.8rem 0 .45rem; font-size: 1.6rem; }
-        .choice p { margin: 0; color: var(--muted); line-height: 1.5; }
-        .arrow { align-self: flex-end; color: var(--accent); font-size: 1.8rem; }
-        @media (max-width: 650px) { .choices { grid-template-columns: 1fr; } .choice { min-height: 190px; } }
     </style>
 </head>
 <body>
-    <main>
-        <div class="brand">Roomly</div>
-        <h1>Make space for your ideas.</h1>
-        <p class="intro">Design a room that feels like yours. Start with a quick preset or sketch the space exactly as you imagine it.</p>
-        <section class="choices" aria-label="Choose how to start">
-            <a class="choice" href="canvas.html">
-                <span class="choice-number">01 / CUSTOM</span>
-                <div><h2>Draw your room</h2><p>Sketch the outline and tell us about any pillars inside it.</p></div>
-                <span class="arrow" aria-hidden="true">↗</span>
-            </a>
-            <a class="choice" href="preset.html">
-                <span class="choice-number">02 / QUICK START</span>
-                <div><h2>Choose a preset</h2><p>Pick a room shape and dimensions, then start arranging furniture.</p></div>
-                <span class="arrow" aria-hidden="true">↗</span>
-            </a>
+    <main class="home">
+        <section class="intro">
+            <a class="wordmark" href="mainpage.html">Roomly</a>
+            <h1>See the room before you buy the furniture.</h1>
+            <p class="lede">Set up your room in a minute, then drag furniture in and check it fits, from every angle.</p>
+            <nav class="start" aria-label="Choose how to start">
+                <a class="start-card start-card--primary" href="preset.html">
+                    <span class="start-icon" aria-hidden="true">
+                        <svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="14" height="11" rx="1.5"/><circle cx="21" cy="19" r="5"/></svg>
+                    </span>
+                    <span><span class="start-title">Start from a preset</span><span class="start-sub">Rectangle, square or round. Just type in the size.</span></span>
+                </a>
+                <a class="start-card" href="canvas.html">
+                    <span class="start-icon" aria-hidden="true">
+                        <svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h12v8h6v10H5z"/><circle cx="5" cy="5" r="1.6" fill="currentColor"/><circle cx="17" cy="5" r="1.6" fill="currentColor"/><circle cx="23" cy="23" r="1.6" fill="currentColor"/></svg>
+                    </span>
+                    <span><span class="start-title">Draw your own room</span><span class="start-sub">Trace the outline corner by corner and mark any pillars.</span></span>
+                </a>
+            </nav>
         </section>
+        <div class="hero-art" aria-hidden="false"><svg viewBox="0 0 560 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a small living room with a sofa, armchair, coffee table and lamp">
+<defs><filter id="soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs>
+<ellipse cx="280" cy="392" rx="236" ry="40" fill="rgba(27,36,40,.18)" filter="url(#soft)"/>
+<polygon points="280.0,146.0 510.4,279.0 280.0,412.0 49.6,279.0" fill="#c99f6e" /><polygon points="49.6,288.5 280.0,421.5 280.0,412.0 49.6,279.0" fill="#9c7a52" /><polygon points="510.4,288.5 280.0,421.5 280.0,412.0 510.4,279.0" fill="#7f6141" />
+<polyline points="312.9,165.0 82.6,298.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="345.8,184.0 115.5,317.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="378.7,203.0 148.4,336.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="411.6,222.0 181.3,355.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="444.5,241.0 214.2,374.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="477.4,260.0 247.1,393.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polygon points="280.0,8.4 287.2,12.6 49.6,149.8 42.4,145.6" fill="#2a3337" /><polygon points="42.4,274.8 49.6,279.0 49.6,149.8 42.4,145.6" fill="#cfcbc2" /><polygon points="287.2,141.8 49.6,279.0 49.6,149.8 287.2,12.6" fill="#e6e3dc" />
+<polygon points="287.2,12.6 517.6,145.6 510.4,149.8 280.0,16.8" fill="#2a3337" /><polygon points="280.0,146.0 510.4,279.0 510.4,149.8 280.0,16.8" fill="#f4f2ee" /><polygon points="517.6,274.8 510.4,279.0 510.4,149.8 517.6,145.6" fill="#cfcbc2" />
+<polygon points="280.0,8.4 287.2,12.6 280.0,16.8 272.8,12.6" fill="#2a3337" /><polygon points="272.8,12.6 280.0,16.8 280.0,16.8 272.8,12.6" fill="#2a3337" /><polygon points="287.2,12.6 280.0,16.8 280.0,16.8 287.2,12.6" fill="#2a3337" />
+<polygon points="348.8,113.9 408.0,148.1 408.0,106.3 348.8,72.1" fill="#f8f7f4" stroke="#c28a2c" stroke-width="2.5"/>
+<polygon points="355.3,110.1 401.4,136.7 401.4,110.1 355.3,83.5" fill="#1e5b4c" opacity=".85"/>
+<polygon points="260.3,214.0 391.9,290.0 276.7,356.5 145.1,280.5" fill="#eee8da" stroke="#c28a2c" stroke-width="1.5"/>
+<g class="piece" style="--i:0"><polygon points="311.3,143.2 423.1,207.7 387.0,228.6 275.1,164.0" fill="#2c7a66" /><polygon points="275.1,194.4 387.0,259.0 387.0,228.6 275.1,164.0" fill="#1e5b4c" /><polygon points="423.1,238.1 387.0,259.0 387.0,228.6 423.1,207.7" fill="#164538" /><polygon points="311.3,112.8 423.1,177.3 411.6,184.0 299.7,119.4" fill="#2c7a66" /><polygon points="299.7,149.8 411.6,214.4 411.6,184.0 299.7,119.4" fill="#1e5b4c" /><polygon points="423.1,207.7 411.6,214.4 411.6,184.0 423.1,177.3" fill="#164538" /><polygon points="299.7,132.7 309.6,138.4 284.9,152.7 275.1,146.9" fill="#2c7a66" /><polygon points="275.1,164.0 284.9,169.8 284.9,152.7 275.1,146.9" fill="#1e5b4c" /><polygon points="309.6,155.5 284.9,169.8 284.9,152.7 309.6,138.4" fill="#164538" /><polygon points="401.8,191.6 411.6,197.3 387.0,211.5 377.1,205.9" fill="#2c7a66" /><polygon points="377.1,223.0 387.0,228.6 387.0,211.5 377.1,205.9" fill="#1e5b4c" /><polygon points="411.6,214.4 387.0,228.6 387.0,211.5 411.6,197.3" fill="#164538" /></g>
+<g class="piece" style="--i:1"><polygon points="447.8,185.9 451.1,187.8 447.8,189.7 444.5,187.8" fill="#3a464b" /><polygon points="444.5,271.4 447.8,273.3 447.8,189.7 444.5,187.8" fill="#2a3337" /><polygon points="451.1,271.4 447.8,273.3 447.8,189.7 451.1,187.8" fill="#1b2428" /><polygon points="447.8,155.5 467.6,166.9 447.8,178.3 428.1,166.9" fill="#fff3cf" /><polygon points="428.1,187.8 447.8,199.2 447.8,178.3 428.1,166.9" fill="#f2d98f" /><polygon points="467.6,187.8 447.8,199.2 447.8,178.3 467.6,166.9" fill="#d9bc6a" /></g>
+<g class="piece" style="--i:2"><polygon points="263.5,231.5 319.5,263.8 286.6,282.8 230.6,250.5" fill="#8a5a3c" /><polygon points="230.6,269.5 286.6,301.8 286.6,282.8 230.6,250.5" fill="#6b4229" /><polygon points="319.5,282.8 286.6,301.8 286.6,282.8 319.5,263.8" fill="#553320" /></g>
+<g class="piece" style="--i:3"><polygon points="171.4,197.3 207.6,218.2 171.4,239.1 135.2,218.2" fill="#d9a446" /><polygon points="135.2,244.8 171.4,265.7 171.4,239.1 135.2,218.2" fill="#c28a2c" /><polygon points="207.6,244.8 171.4,265.7 171.4,239.1 207.6,218.2" fill="#9c6d1e" /><polygon points="171.4,170.7 181.3,176.4 145.1,197.3 135.2,191.6" fill="#d9a446" /><polygon points="135.2,218.2 145.1,223.9 145.1,197.3 135.2,191.6" fill="#c28a2c" /><polygon points="181.3,203.0 145.1,223.9 145.1,197.3 181.3,176.4" fill="#9c6d1e" /></g>
+</svg></div>
     </main>
 </body>
 </html>
