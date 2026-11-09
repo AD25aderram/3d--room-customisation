@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roomly | See the room before you buy the furniture</title>
-    <meta name="description" content="Roomly is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
+    <title>Floorplot | See the room before you buy the furniture</title>
+    <meta name="description" content="Floorplot is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Roomly">
-    <meta property="og:title" content="Roomly | See the room before you buy the furniture">
-    <meta property="og:description" content="Roomly is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
+    <meta property="og:site_name" content="Floorplot">
+    <meta property="og:title" content="Floorplot | See the room before you buy the furniture">
+    <meta property="og:description" content="Floorplot is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
     <meta property="og:url" content="https://floorplot.vercel.app/">
     <meta property="og:image" content="https://floorplot.vercel.app/og-image.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Roomly | See the room before you buy the furniture">
-    <meta name="twitter:description" content="Roomly is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
+    <meta name="twitter:title" content="Floorplot | See the room before you buy the furniture">
+    <meta name="twitter:description" content="Floorplot is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
     <meta name="twitter:image" content="https://floorplot.vercel.app/og-image.png">
     <link rel="canonical" href="https://floorplot.vercel.app/">
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
@@ -24,7 +24,7 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Roomly",
+        "name": "Floorplot",
         "description": "A free 3D room planner for drawing a room, arranging furniture, and checking that it fits.",
         "applicationCategory": "DesignApplication",
         "operatingSystem": "Any",
@@ -146,7 +146,7 @@
 <body>
     <div class="wrap">
         <header class="site-nav">
-            <a class="wordmark" href="#top">Roomly</a>
+            <a class="wordmark" href="#top">Floorplot</a>
             <nav aria-label="Sections">
                 <ul>
                     <li><a href="#how-it-works">How it works</a></li>
@@ -246,7 +246,7 @@
             <section class="section" id="next">
                 <div>
                     <h2>What's next</h2>
-                    <p class="section-intro">Where Roomly is going. Tell us what would help you most.</p>
+                    <p class="section-intro">Where Floorplot is going. Tell us what would help you most.</p>
                 </div>
                 <div class="roadmap">
                     <div class="roadmap-next">
@@ -280,8 +280,8 @@
                 <div>
                     <div class="about-text">
                         <p>We're engineering students, in the Artificial Intelligence and Software Engineering program.</p>
-                        <p>We built Roomly because buying furniture online is a guessing game. A sofa that looks right in a photo can turn out too big for the room, and the only way to find out used to be buying it. We wanted a way to check first.</p>
-                        <p>Roomly runs in your browser, so there's no account to make and nothing to download.</p>
+                        <p>We built Floorplot because buying furniture online is a guessing game. A sofa that looks right in a photo can turn out too big for the room, and the only way to find out used to be buying it. We wanted a way to check first.</p>
+                        <p>Floorplot runs in your browser, so there's no account to make and nothing to download.</p>
                         <p>The team consiste of : Adam Aderram / Toukam abderrahman </p>
                     </div>
                     <dl class="facts">
@@ -299,7 +299,7 @@
                 <div>
                     <details>
                         <summary>Do I need an account?</summary>
-                        <p>No. Open Roomly and start planning.</p>
+                        <p>No. Open Floorplot and start planning.</p>
                     </details>
                     <details>
                         <summary>Is my room saved?</summary>
@@ -315,7 +315,7 @@
                     </details>
                     <details>
                         <summary>Does it work on a phone?</summary>
-                        <p>It works, but Roomly is best on a computer. Moving and turning pieces is much easier with a mouse.</p>
+                        <p>It works, but Floorplot is best on a computer. Moving and turning pieces is much easier with a mouse.</p>
                     </details>
                 </div>
             </section>
@@ -341,12 +341,12 @@
         </main>
 
         <footer class="site-footer">
-            <a class="wordmark" href="#top">Roomly</a>
+            <a class="wordmark" href="#top">Floorplot</a>
             <ul>
                 <li><a href="preset.html">Start from a preset</a></li>
                 <li><a href="canvas.html">Draw your own room</a></li>
             </ul>
-            <span>© 2026 Roomly</span>
+            <span>© 2026 Floorplot</span>
         </footer>
     </div>
 
@@ -362,7 +362,7 @@
             event.preventDefault();
             const data = new FormData(event.target);
             const body = `${data.get("message")}\n\nFrom: ${data.get("name") || "Anonymous"} <${data.get("email")}>`;
-            window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Message about Roomly")}&body=${encodeURIComponent(body)}`;
+            window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Message about Floorplot")}&body=${encodeURIComponent(body)}`;
             document.getElementById("form-status").textContent = `Your email app should open with the message ready. If it doesn't, write to ${CONTACT_EMAIL}.`;
         });
     </script>

@@ -1,4 +1,4 @@
-# 3D Room Customizer
+# Floorplot 3D Room Customizer
 
 ## ES module layout
 
