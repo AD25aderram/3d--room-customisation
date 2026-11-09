@@ -20,7 +20,7 @@ Add one object to the plain `CATALOG` array in `src/furniture/catalog.js`. Provi
 
 ## SEO and deployment
 
-`index.html` is the public landing page. The preset, drawing, and editor pages are marked `noindex`; `robots.txt` allows crawlers to read those directives. Once the production URL is known, add its absolute URL as the landing page canonical and `og:url`, and publish a `sitemap.xml` containing that URL. Add the provided share image as an absolute `og:image` URL when it is ready.
+`index.html` is the public landing page. The preset, drawing, and editor pages are marked `noindex`; `robots.txt` allows crawlers to read those directives. The canonical URL, social metadata, `robots.txt`, and `sitemap.xml` use the production URL `https://floorplot.vercel.app/`. The 1200 × 630 social preview image is `og-image.png`.
 
 ## Items noticed and left unchanged
 
