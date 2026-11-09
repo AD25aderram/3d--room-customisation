@@ -18,6 +18,10 @@ Dependencies flow from core room and physics utilities toward furniture; interac
 
 Add one object to the plain `CATALOG` array in `src/furniture/catalog.js`. Provide a unique `id`, the displayed `label`, a model `path`, and either a target `width` or `height` in scene units. The Add menu and loader consume the entry automatically. Keep model paths valid relative to the page URL, as with the existing entries.
 
+## SEO and deployment
+
+`index.html` is the public landing page. The preset, drawing, and editor pages are marked `noindex`; `robots.txt` allows crawlers to read those directives. Once the production URL is known, add its absolute URL as the landing page canonical and `og:url`, and publish a `sitemap.xml` containing that URL. Add the provided share image as an absolute `og:image` URL when it is ready.
+
 ## Items noticed and left unchanged
 
 - The fallback path assumes room builders provide a non-empty `userData.outline`; malformed room geometry can still fail while bounds are calculated.

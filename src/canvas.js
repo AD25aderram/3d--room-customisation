@@ -191,7 +191,7 @@ function startOver() {
 function finishRoom() {
     sessionStorage.removeItem('presetRoom');
     sessionStorage.setItem('customRoom', JSON.stringify({ points, pillars }));
-    window.location.href = 'index.html';
+    window.location.href = 'editor.html';
 }
 
 canvas.addEventListener('click', e => {

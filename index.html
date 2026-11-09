@@ -3,32 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roomly | Room editor</title>
+    <title>Roomly | See the room before you buy the furniture</title>
+    <meta name="description" content="Roomly is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Roomly">
+    <meta property="og:title" content="Roomly | See the room before you buy the furniture">
+    <meta property="og:description" content="Roomly is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Roomly | See the room before you buy the furniture">
+    <meta name="twitter:description" content="Roomly is a free 3D room planner. Draw your room, drop in furniture, and check that it fits before you buy.">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Roomly",
+        "description": "A free 3D room planner for drawing a room, arranging furniture, and checking that it fits.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        }
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="./src/styles/theme.css">
-    <link rel="stylesheet" href="./src/styles/editor.css">
+    <style>
+        @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+        .wrap { width: min(1180px, 92vw); margin: 0 auto; }
 
-    <script type="importmap">
-{
-  "imports": {
-    "three": "./node_modules/three/build/three.module.js",
-    "three/addons/": "./node_modules/three/examples/jsm/"
-  }
-}
-</script>
-    <script type="module" src="./src/main.js"></script>
+        /* Top navigation */
+        .site-nav { display: flex; justify-content: space-between; align-items: center; gap: .75rem 1.5rem; flex-wrap: wrap; padding: 1.25rem 0; }
+        .site-nav ul { display: flex; flex-wrap: wrap; gap: .25rem clamp(.9rem, 2.5vw, 1.75rem); margin: 0; padding: 0; list-style: none; }
+        .site-nav a:not(.wordmark) { color: var(--ink-soft); text-decoration: none; font-weight: 500; }
+        .site-nav a:not(.wordmark):hover { color: var(--pine); }
+
+        /* Hero */
+        .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; padding: clamp(1.5rem, 5vw, 3.5rem) 0 clamp(3rem, 8vw, 6rem); }
+        h1 { margin: 0 0 1.25rem; font-size: clamp(2.6rem, 6vw, 4.8rem); font-weight: 800; letter-spacing: -0.045em; }
+        .lede { max-width: 30rem; margin: 0 0 2.25rem; color: var(--ink-soft); font-size: 1.15rem; }
+        .start { display: grid; gap: 12px; max-width: 30rem; }
+        .start-card { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: center; padding: 16px 18px; color: var(--ink); text-decoration: none; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper); transition: border-color .15s, transform .15s, box-shadow .15s; }
+        .start-card:hover { border-color: var(--pine); transform: translateY(-2px); box-shadow: var(--shadow-1); }
+        .start-card--primary { background: var(--pine); border-color: var(--pine); color: #fff; }
+        .start-card--primary:hover { background: var(--pine-deep); }
+        .start-icon { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: var(--plaster); color: var(--pine); }
+        .start-card--primary .start-icon { background: rgba(255,255,255,.14); color: #fff; }
+        .start-title { display: block; font: 700 1.15rem var(--font-display); letter-spacing: -0.02em; }
+        .start-sub { display: block; margin-top: 2px; font-size: .95rem; color: var(--ink-soft); }
+        .start-card--primary .start-sub { color: rgba(255,255,255,.82); }
+        .hero-art { border-radius: 32px; background: var(--plaster-deep); padding: clamp(.5rem, 2vw, 1.5rem); }
+        .hero-art svg { display: block; width: 100%; height: auto; }
+        .hero-art .piece { animation: place .8s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(.35s + var(--i) * .16s); }
+        @keyframes place { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: none; } }
+
+        /* Sections: heading on the left, content on the right */
+        .section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr); gap: clamp(1.5rem, 4vw, 4rem); padding: clamp(2.5rem, 6vw, 5rem) 0; border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
+        .section h2 { margin: 0; font-size: clamp(1.9rem, 3.6vw, 2.7rem); font-weight: 800; letter-spacing: -0.04em; }
+        .section-intro { max-width: 22rem; margin: .75rem 0 0; color: var(--ink-soft); }
+        .section h3 { margin: 0 0 .35rem; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+        .section p { margin: 0; }
+        .muted { color: var(--ink-soft); }
+
+        /* How it works: a real sequence, so numbered */
+        .steps { counter-reset: step; margin: 0; padding: 0; list-style: none; }
+        .steps li { counter-increment: step; display: grid; grid-template-columns: 4.25rem 1fr; gap: 1rem; padding: 0 0 1.75rem; margin-bottom: 1.75rem; border-bottom: 1px solid var(--line); }
+        .steps li:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+        .steps li::before { content: counter(step); font: 800 2.8rem/1 var(--font-display); letter-spacing: -0.05em; color: var(--pine); }
+
+        /* Features */
+        .features { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem 2.5rem; margin: 0; padding: 0; list-style: none; }
+
+        /* What's next */
+        .roadmap { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem 2.5rem; }
+        .roadmap h3 { font-size: 1.35rem; padding-bottom: .6rem; margin-bottom: 0; border-bottom: 2px solid var(--ink-soft); }
+        .roadmap-next h3 { border-color: var(--pine); color: var(--pine); }
+        .roadmap ul { margin: 0; padding: 0; list-style: none; }
+        .roadmap li { padding: .9rem 0; border-bottom: 1px solid var(--line); }
+        .roadmap strong { display: block; font-weight: 600; }
+        .roadmap li span { color: var(--ink-soft); font-size: .95rem; }
+        .roadmap-note { grid-column: 1 / -1; font-size: .9rem; }
+
+        /* About */
+        .about-text { max-width: 38rem; display: grid; gap: 1rem; font-size: 1.05rem; }
+        .facts { display: grid; grid-template-columns: max-content 1fr; gap: .6rem 1.5rem; margin: 2rem 0 0; padding-top: 1.5rem; border-top: 1px solid var(--line); max-width: 38rem; }
+        .facts dt { color: var(--ink-soft); font-weight: 500; }
+        .facts dd { margin: 0; font-weight: 600; }
+        .facts a { color: var(--pine); }
+
+        /* FAQ */
+        .faq details { border-bottom: 1px solid var(--line); }
+        .faq details:first-child { border-top: 1px solid var(--line); }
+        .faq summary { display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font-weight: 600; font-size: 1.05rem; cursor: pointer; list-style: none; }
+        .faq summary::-webkit-details-marker { display: none; }
+        .faq summary::after { content: "+"; color: var(--pine); font-size: 1.4rem; line-height: 1; }
+        .faq details[open] summary::after { content: "–"; }
+        .faq details p { padding: 0 2rem 1.25rem 0; color: var(--ink-soft); max-width: 38rem; }
+
+        /* Contact */
+        .contact-form { display: grid; gap: 1rem; max-width: 34rem; padding: clamp(1.25rem, 3vw, 1.75rem); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper); }
+        .contact-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .contact-form label { display: grid; gap: .4rem; color: var(--ink-soft); font-size: .9rem; font-weight: 600; }
+        .contact-form input, .contact-form textarea { width: 100%; padding: .7rem .9rem; border: 1px solid rgba(27,36,40,.25); border-radius: var(--r-md); background: #fff; color: var(--ink); font: 500 1rem var(--font-ui); }
+        .contact-form textarea { min-height: 130px; resize: vertical; }
+        .contact-form input:focus, .contact-form textarea:focus { border-color: var(--pine); outline: 3px solid rgba(30,91,76,.2); }
+        .form-status { min-height: 1.4em; font-size: .9rem; color: var(--ink-soft); }
+        .contact-aside { margin-top: 1.25rem; max-width: 34rem; color: var(--ink-soft); }
+        .contact-aside a { color: var(--pine); font-weight: 600; }
+
+        /* Footer */
+        .site-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 2rem 0 2.5rem; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: .9rem; }
+        .site-footer ul { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: 0; padding: 0; list-style: none; }
+        .site-footer a:not(.wordmark) { color: var(--ink-soft); }
+        .site-footer a:not(.wordmark):hover { color: var(--pine); }
+
+        @media (max-width: 860px) {
+            .hero, .section { grid-template-columns: 1fr; }
+            .section-intro { max-width: 32rem; }
+        }
+        @media (max-width: 600px) {
+            .features, .roadmap, .contact-form .row { grid-template-columns: 1fr; }
+            .steps li { grid-template-columns: 3rem 1fr; }
+            .faq details p { padding-right: 0; }
+        }
+    </style>
 </head>
 <body>
-    <header class="topbar">
-        <a class="wordmark" href="mainpage.html" aria-label="Roomly, back to start">Roomly</a>
-        <span class="meta" id="room-meta"></span>
-        <button type="button" class="btn btn--quiet btn--small" id="reset-view">Reset view</button>
-    </header>
+    <div class="wrap">
+        <header class="site-nav">
+            <a class="wordmark" href="#top">Roomly</a>
+            <nav aria-label="Sections">
+                <ul>
+                    <li><a href="#how-it-works">How it works</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#next">What's next</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
 
-    <div id="scene-container"></div>
+        <main id="top">
+            <section class="hero">
+                <div class="intro">
+                    <h1>See the room before you buy the furniture.</h1>
+                    <p class="lede">Set up your room in a minute, then drag furniture in and check it fits, from every angle.</p>
+                    <nav class="start" aria-label="Choose how to start">
+                        <a class="start-card start-card--primary" href="preset.html">
+                            <span class="start-icon" aria-hidden="true">
+                                <svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="14" height="11" rx="1.5"/><circle cx="21" cy="19" r="5"/></svg>
+                            </span>
+                            <span><span class="start-title">Start from a preset</span><span class="start-sub">Rectangle, square or round. Just type in the size.</span></span>
+                        </a>
+                        <a class="start-card" href="canvas.html">
+                            <span class="start-icon" aria-hidden="true">
+                                <svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h12v8h6v10H5z"/><circle cx="5" cy="5" r="1.6" fill="currentColor"/><circle cx="17" cy="5" r="1.6" fill="currentColor"/><circle cx="23" cy="23" r="1.6" fill="currentColor"/></svg>
+                            </span>
+                            <span><span class="start-title">Draw your own room</span><span class="start-sub">Trace the outline corner by corner and mark any pillars.</span></span>
+                        </a>
+                    </nav>
+                </div>
+                <div class="hero-art"><svg viewBox="0 0 560 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a small living room with a sofa, armchair, coffee table and lamp">
+<defs><filter id="soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="9"/></filter></defs>
+<ellipse cx="280" cy="392" rx="236" ry="40" fill="rgba(27,36,40,.18)" filter="url(#soft)"/>
+<polygon points="280.0,146.0 510.4,279.0 280.0,412.0 49.6,279.0" fill="#c99f6e" /><polygon points="49.6,288.5 280.0,421.5 280.0,412.0 49.6,279.0" fill="#9c7a52" /><polygon points="510.4,288.5 280.0,421.5 280.0,412.0 510.4,279.0" fill="#7f6141" />
+<polyline points="312.9,165.0 82.6,298.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="345.8,184.0 115.5,317.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="378.7,203.0 148.4,336.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="411.6,222.0 181.3,355.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="444.5,241.0 214.2,374.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polyline points="477.4,260.0 247.1,393.0" fill="none" stroke="rgba(60,35,15,.16)" stroke-width="1"/>
+<polygon points="280.0,8.4 287.2,12.6 49.6,149.8 42.4,145.6" fill="#2a3337" /><polygon points="42.4,274.8 49.6,279.0 49.6,149.8 42.4,145.6" fill="#cfcbc2" /><polygon points="287.2,141.8 49.6,279.0 49.6,149.8 287.2,12.6" fill="#e6e3dc" />
+<polygon points="287.2,12.6 517.6,145.6 510.4,149.8 280.0,16.8" fill="#2a3337" /><polygon points="280.0,146.0 510.4,279.0 510.4,149.8 280.0,16.8" fill="#f4f2ee" /><polygon points="517.6,274.8 510.4,279.0 510.4,149.8 517.6,145.6" fill="#cfcbc2" />
+<polygon points="280.0,8.4 287.2,12.6 280.0,16.8 272.8,12.6" fill="#2a3337" /><polygon points="272.8,12.6 280.0,16.8 280.0,16.8 272.8,12.6" fill="#2a3337" /><polygon points="287.2,12.6 280.0,16.8 280.0,16.8 287.2,12.6" fill="#2a3337" />
+<polygon points="348.8,113.9 408.0,148.1 408.0,106.3 348.8,72.1" fill="#f8f7f4" stroke="#c28a2c" stroke-width="2.5"/>
+<polygon points="355.3,110.1 401.4,136.7 401.4,110.1 355.3,83.5" fill="#1e5b4c" opacity=".85"/>
+<polygon points="260.3,214.0 391.9,290.0 276.7,356.5 145.1,280.5" fill="#eee8da" stroke="#c28a2c" stroke-width="1.5"/>
+<g class="piece" style="--i:0"><polygon points="311.3,143.2 423.1,207.7 387.0,228.6 275.1,164.0" fill="#2c7a66" /><polygon points="275.1,194.4 387.0,259.0 387.0,228.6 275.1,164.0" fill="#1e5b4c" /><polygon points="423.1,238.1 387.0,259.0 387.0,228.6 423.1,207.7" fill="#164538" /><polygon points="311.3,112.8 423.1,177.3 411.6,184.0 299.7,119.4" fill="#2c7a66" /><polygon points="299.7,149.8 411.6,214.4 411.6,184.0 299.7,119.4" fill="#1e5b4c" /><polygon points="423.1,207.7 411.6,214.4 411.6,184.0 423.1,177.3" fill="#164538" /><polygon points="299.7,132.7 309.6,138.4 284.9,152.7 275.1,146.9" fill="#2c7a66" /><polygon points="275.1,164.0 284.9,169.8 284.9,152.7 275.1,146.9" fill="#1e5b4c" /><polygon points="309.6,155.5 284.9,169.8 284.9,152.7 309.6,138.4" fill="#164538" /><polygon points="401.8,191.6 411.6,197.3 387.0,211.5 377.1,205.9" fill="#2c7a66" /><polygon points="377.1,223.0 387.0,228.6 387.0,211.5 377.1,205.9" fill="#1e5b4c" /><polygon points="411.6,214.4 387.0,228.6 387.0,211.5 411.6,197.3" fill="#164538" /></g>
+<g class="piece" style="--i:1"><polygon points="447.8,185.9 451.1,187.8 447.8,189.7 444.5,187.8" fill="#3a464b" /><polygon points="444.5,271.4 447.8,273.3 447.8,189.7 444.5,187.8" fill="#2a3337" /><polygon points="451.1,271.4 447.8,273.3 447.8,189.7 451.1,187.8" fill="#1b2428" /><polygon points="447.8,155.5 467.6,166.9 447.8,178.3 428.1,166.9" fill="#fff3cf" /><polygon points="428.1,187.8 447.8,199.2 447.8,178.3 428.1,166.9" fill="#f2d98f" /><polygon points="467.6,187.8 447.8,199.2 447.8,178.3 467.6,166.9" fill="#d9bc6a" /></g>
+<g class="piece" style="--i:2"><polygon points="263.5,231.5 319.5,263.8 286.6,282.8 230.6,250.5" fill="#8a5a3c" /><polygon points="230.6,269.5 286.6,301.8 286.6,282.8 230.6,250.5" fill="#6b4229" /><polygon points="319.5,282.8 286.6,301.8 286.6,282.8 319.5,263.8" fill="#553320" /></g>
+<g class="piece" style="--i:3"><polygon points="171.4,197.3 207.6,218.2 171.4,239.1 135.2,218.2" fill="#d9a446" /><polygon points="135.2,244.8 171.4,265.7 171.4,239.1 135.2,218.2" fill="#c28a2c" /><polygon points="207.6,244.8 171.4,265.7 171.4,239.1 207.6,218.2" fill="#9c6d1e" /><polygon points="171.4,170.7 181.3,176.4 145.1,197.3 135.2,191.6" fill="#d9a446" /><polygon points="135.2,218.2 145.1,223.9 145.1,197.3 135.2,191.6" fill="#c28a2c" /><polygon points="181.3,203.0 145.1,223.9 145.1,197.3 181.3,176.4" fill="#9c6d1e" /></g>
+</svg></div>
+            </section>
 
-    <p class="hint" id="hint">Right-click or double-click a piece to move, rotate, resize or remove it. Drag to look around, scroll to zoom.</p>
+            <section class="section" id="how-it-works">
+                <div>
+                    <h2>How it works</h2>
+                    <p class="section-intro">From an empty room to a furnished one in a few minutes. No account, nothing to install.</p>
+                </div>
+                <ol class="steps">
+                    <li>
+                        <div>
+                            <h3>Set up your room</h3>
+                            <p class="muted">Pick a rectangle, square or round preset and type in the size, or draw your own outline corner by corner. Mark any pillars so you know what's in the way.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>Furnish it</h3>
+                            <p class="muted">Add a sofa, bed, table or lamp, or import your own 3D model. Drag pieces into place, turn them, and resize them to match the real thing.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>Check that it fits</h3>
+                            <p class="muted">Orbit around the room and zoom in to see where everything lands. Pieces can't overlap each other or sit inside walls, so with real sizes, what fits on screen is a fair test of what fits in the room.</p>
+                        </div>
+                    </li>
+                </ol>
+            </section>
+
+            <section class="section" id="features">
+                <div>
+                    <h2>What you can do</h2>
+                    <p class="section-intro">The basics of planning a room, without a learning curve.</p>
+                </div>
+                <ul class="features">
+                    <li><h3>Work in real sizes</h3><p class="muted">Rooms and furniture are measured in metres, and the editor shows your floor area as you go.</p></li>
+                    <li><h3>Draw any shape</h3><p class="muted">Trace an L-shaped room or one with an alcove, and add pillars that furniture has to go around.</p></li>
+                    <li><h3>Furniture that respects space</h3><p class="muted">Pieces can't overlap each other, the walls or the pillars, and new pieces find a free spot on their own.</p></li>
+                    <li><h3>Move, turn and resize</h3><p class="muted">Drag to move, press R or use the menu to turn a piece 90°, and type exact dimensions to match a product.</p></li>
+                    <li><h3>Bring your own models</h3><p class="muted">Import any .glb file to try a specific piece of furniture in your room.</p></li>
+                    <li><h3>Look from every angle</h3><p class="muted">Orbit, zoom and reset the view. Walls between you and the room hide automatically, so nothing blocks your view.</p></li>
+                </ul>
+            </section>
+
+            <section class="section" id="next">
+                <div>
+                    <h2>What's next</h2>
+                    <p class="section-intro">Where Roomly is going. Tell us what would help you most.</p>
+                </div>
+                <div class="roadmap">
+                    <div class="roadmap-next">
+                        <h3>Next</h3>
+                        <ul>
+                            <li><strong>Undo for removed furniture</strong><span>Bring back a piece you deleted by mistake.</span></li>
+                            <li><strong>Bigger catalog</strong><span>implementing a huge sets of fourniture to choose from.</span></li>
+                            <li><strong>Faster loading</strong><span>Lighter models so pieces appear almost instantly.</span></li>
+                            <li><strong>exporting / importing</strong><span>adding exprot and import to save the room localy.</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Later</h3>
+                        <ul>
+                            <li><strong>creating account</strong><span>create an account to save all of the furniture import and room desinged.</span></li>
+                            <li><strong>Wall and floor colours</strong><span>Try different paints and flooring in your room.</span></li>
+                            <li><strong>share a room</strong><span>send your plan to someone with a link.</span></li>
+                            <li><strong>Measuring tool</strong><span>See the distance between any two points.</span></li>
+                            <li><strong>Doors and windows</strong><span>Add them to walls to plan around them.</span></li>
+                            <li><strong>Export a picture</strong><span>Save an image of your room to share or print.</span></li>
+                        </ul>
+                    </div>
+                    <p class="roadmap-note muted">These are plans, not promises, and the order can change.</p>
+                </div>
+            </section>
+
+            <section class="section" id="about">
+                <div>
+                    <h2>Who we are</h2>
+                </div>
+                <div>
+                    <div class="about-text">
+                        <p>We're engineering students, in the Artificial Intelligence and Software Engineering program.</p>
+                        <p>We built Roomly because buying furniture online is a guessing game. A sofa that looks right in a photo can turn out too big for the room, and the only way to find out used to be buying it. We wanted a way to check first.</p>
+                        <p>Roomly runs in your browser, so there's no account to make and nothing to download.</p>
+                        <p>The team consiste of : Adam Aderram / Toukam abderrahman </p>
+                    </div>
+                    <dl class="facts">
+                        <dt>Built at</dt><dd>ENSAM Casablanca</dd>
+                        <dt>Built with</dt><dd>three.js and plain JavaScript</dd>
+                        <dt>Code</dt><dd><a href="https://github.com/AD25aderram/3d--room-customisation">View it on GitHub</a></dd>
+                    </dl>
+                </div>
+            </section>
+
+            <section class="section faq" id="faq">
+                <div>
+                    <h2>Questions</h2>
+                </div>
+                <div>
+                    <details>
+                        <summary>Do I need an account?</summary>
+                        <p>No. Open Roomly and start planning.</p>
+                    </details>
+                    <details>
+                        <summary>Is my room saved?</summary>
+                        <p>Not yet. Your room is kept while you keep the browser tab open, and closing it clears the room. Saving and sharing are on our list.</p>
+                    </details>
+                    <details>
+                        <summary>Are the furniture sizes accurate?</summary>
+                        <p>The built-in pieces use approximate sizes. To match a real product, choose Resize on a piece and type in its measurements.</p>
+                    </details>
+                    <details>
+                        <summary>Can I use my own furniture?</summary>
+                        <p>Yes. Use "Import a .glb model" in the editor to add any 3D model in that format.</p>
+                    </details>
+                    <details>
+                        <summary>Does it work on a phone?</summary>
+                        <p>It works, but Roomly is best on a computer. Moving and turning pieces is much easier with a mouse.</p>
+                    </details>
+                </div>
+            </section>
+
+            <section class="section" id="contact">
+                <div>
+                    <h2>Get in touch</h2>
+                    <p class="section-intro">Found a bug, or have an idea for what we should build next?</p>
+                </div>
+                <div>
+                    <form class="contact-form" id="contact-form">
+                        <div class="row">
+                            <label>Your name <input type="text" name="name" autocomplete="name"></label>
+                            <label>Your email <input type="email" name="email" autocomplete="email" required></label>
+                        </div>
+                        <label>Message <textarea name="message" required></textarea></label>
+                        <button class="btn" type="submit">Send message</button>
+                        <p class="form-status" id="form-status" role="status"></p>
+                    </form>
+                    <p class="contact-aside">Prefer to write directly? Email <a id="contact-email" href="#"></a>.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <a class="wordmark" href="#top">Roomly</a>
+            <ul>
+                <li><a href="preset.html">Start from a preset</a></li>
+                <li><a href="canvas.html">Draw your own room</a></li>
+            </ul>
+            <span>© 2026 Roomly</span>
+        </footer>
+    </div>
+
+    <script>
+        const CONTACT_EMAIL = "ad.aderram@gmail.com";
+
+        const mailLink = document.getElementById("contact-email");
+        mailLink.textContent = CONTACT_EMAIL;
+        mailLink.href = `mailto:${CONTACT_EMAIL}`;
+
+        // The form opens the visitor's email app with the message filled in. It sends nothing by itself.
+        document.getElementById("contact-form").addEventListener("submit", (event) => {
+            event.preventDefault();
+            const data = new FormData(event.target);
+            const body = `${data.get("message")}\n\nFrom: ${data.get("name") || "Anonymous"} <${data.get("email")}>`;
+            window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Message about Roomly")}&body=${encodeURIComponent(body)}`;
+            document.getElementById("form-status").textContent = `Your email app should open with the message ready. If it doesn't, write to ${CONTACT_EMAIL}.`;
+        });
+    </script>
 </body>
 </html>

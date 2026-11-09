@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomly | Room editor</title>
+    <meta name="description" content="Arrange furniture in your custom 3D room and check how everything fits.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="./src/styles/theme.css">
+    <link rel="stylesheet" href="./src/styles/editor.css">
+
+    <script type="importmap">
+{
+  "imports": {
+    "three": "./node_modules/three/build/three.module.js",
+    "three/addons/": "./node_modules/three/examples/jsm/"
+  }
+}
+</script>
+    <script type="module" src="./src/main.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <a class="wordmark" href="index.html" aria-label="Roomly, back to start">Roomly</a>
+        <span class="meta" id="room-meta"></span>
+        <button type="button" class="btn btn--quiet btn--small" id="reset-view">Reset view</button>
+    </header>
+
+    <div id="scene-container"></div>
+
+    <p class="hint" id="hint">Right-click or double-click a piece to move, rotate, resize or remove it. Drag to look around, scroll to zoom.</p>
+</body>
+</html>
