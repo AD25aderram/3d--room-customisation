@@ -2,11 +2,11 @@ import { loadRoom } from "./room/loadRoom.js";
 import { createScene } from "./core/scene.js";
 import { CATALOG } from "./furniture/catalog.js";
 import { buildFurniture, buildFurnitureFromFile } from "./furniture/loader.js";
-import { findFreeSpot } from "./furniture/placement.js";
 import { createFurnitureStore } from "./furniture/store.js";
 import { updateWallVisibility } from "./room/wallVisibility.js";
 import { installDrag } from "./interaction/drag.js";
 import { installHover } from "./interaction/hover.js";
+import { installPlacementPreview } from "./interaction/placementPreview.js";
 import { installContextMenu } from "./interaction/contextMenu.js";
 import { buildAddMenu } from "./ui/addMenu.js";
 import { showMessage } from "./ui/toast.js";
@@ -51,24 +51,16 @@ updateMeta();
 const store = createFurnitureStore(updateMeta);
 const furniture = store.items;
 
-function placeFurniture(pivot, entry) {
-  const spot = findFreeSpot(pivot, collisionRoom, furniture);
-  if (!spot) {
-    showMessage(`No free floor left for the ${entry.label.toLowerCase()}`);
-    return;
-  }
-  pivot.rotation.y = spot.rot;
-  pivot.position.set(spot.x, 0, spot.z);
-  scene.add(pivot);
-  store.add(pivot);
-}
+const placementPreview = installPlacementPreview({
+  renderer, camera, orbit, scene, furniture, room: collisionRoom, store,
+});
 
 async function addFurniture(entry) {
   try {
     const pivot = entry.file
       ? await buildFurnitureFromFile(entry.file, entry)
       : await buildFurniture(entry);
-    placeFurniture(pivot, entry);
+    placementPreview.begin(pivot, entry);
   } catch (error) {
     console.error(`Failed to load ${entry.label}:`, error);
     showMessage(`Could not load ${entry.label}`);
@@ -95,7 +87,7 @@ async function importFurniture(file, addEntry) {
   try {
     const pivot = await buildFurnitureFromFile(file, entry);
     addEntry(entry);
-    placeFurniture(pivot, entry);
+    placementPreview.begin(pivot, entry);
   } catch (error) {
     console.error(`Failed to load ${file.name}:`, error);
     showMessage(`Could not load ${file.name}`);
@@ -104,7 +96,7 @@ async function importFurniture(file, addEntry) {
 
 buildAddMenu(CATALOG, addFurniture, importFurniture);
 const drag = installDrag({ renderer, camera, orbit, scene, furniture, room: collisionRoom });
-installHover({ renderer, scene, drag });
+installHover({ renderer, scene, drag, isPlacementActive: placementPreview.isActive });
 installContextMenu({ renderer, furniture, scene, drag, store, room: collisionRoom });
 
 // "Reset view" returns the camera to where it started.
