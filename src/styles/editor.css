@@ -19,7 +19,25 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
   border-radius: 999px;
   box-shadow: var(--shadow-1);
 }
+.view-control {
+  position: fixed; top: 16px; left: 50%; z-index: 2147483647;
+  transform: translateX(-50%);
+}
 .topbar .meta { color: var(--ink-soft); font-size: 0.875rem; white-space: nowrap; }
+.view-menu {
+  position: absolute; top: calc(100% + 10px); left: 50%; z-index: 2147483647;
+  width: 160px; padding: 6px;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--r-md); box-shadow: var(--shadow-2);
+  transform: translateX(-50%);
+}
+.view-menu[hidden] { display: none; }
+.view-menu button {
+  display: block; width: 100%; padding: 9px 10px;
+  border: 0; border-radius: var(--r-sm); background: none;
+  color: var(--ink); text-align: left; font: 500 0.9rem var(--font-ui); cursor: pointer;
+}
+.view-menu button:hover, .view-menu button:focus-visible, .view-menu button[aria-checked="true"] { background: var(--plaster); }
 
 /* Furniture dock */
 .dock {
@@ -127,6 +145,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 /* Phones: furniture becomes a bottom strip */
 @media (max-width: 720px) {
   .topbar { top: 10px; left: 10px; }
+  .view-control { top: 10px; }
   .topbar .meta { display: none; }
   .dock { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: none; }
   .pieces { display: flex; gap: 6px; padding-bottom: 10px; overflow-x: auto; overflow-y: hidden; }

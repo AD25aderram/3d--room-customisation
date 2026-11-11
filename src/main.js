@@ -115,6 +115,55 @@ document.getElementById("reset-view")?.addEventListener("click", () => {
   orbit.update();
 });
 
+// Camera presets keep the same room target and only change the camera position.
+const viewToggle = document.getElementById("view-menu-toggle");
+const viewMenu = document.getElementById("view-menu");
+const viewOptions = [...(viewMenu?.querySelectorAll("[data-camera-view]") ?? [])];
+const roomWidth = bounds.maxX - bounds.minX;
+const roomDepth = bounds.maxZ - bounds.minZ;
+const viewDistance = Math.max(roomWidth, roomDepth) * 1.8;
+const wallHeight = room.userData.walls?.reduce((height, wall) =>
+  Math.max(height, (wall.mesh.position.y ?? 0) + (wall.mesh.geometry.parameters.height ?? 0) / 2), 0
+) || 2.5;
+
+function setCameraView(view) {
+  const target = orbit.target.clone().set(centerX, view === "eye" ? wallHeight / 2 : 1.5, centerZ);
+  orbit.target.copy(target);
+  if (view === "top") {
+    camera.position.set(centerX, target.y + viewDistance, centerZ);
+  } else {
+    const height = view === "eye" ? target.y : viewDistance * 0.55;
+    const horizontal = Math.sqrt(Math.max(0, viewDistance ** 2 - (height - target.y) ** 2));
+    camera.position.set(centerX + horizontal * 0.62, height, centerZ + horizontal * 0.78);
+  }
+  orbit.update();
+  viewOptions.forEach((option) => option.setAttribute("aria-checked", String(option.dataset.cameraView === view)));
+}
+
+viewToggle?.addEventListener("click", () => {
+  const open = viewToggle.getAttribute("aria-expanded") === "true";
+  viewToggle.setAttribute("aria-expanded", String(!open));
+  viewMenu.hidden = open;
+});
+viewOptions.forEach((option) => option.addEventListener("click", () => {
+  setCameraView(option.dataset.cameraView);
+  viewMenu.hidden = true;
+  viewToggle.setAttribute("aria-expanded", "false");
+}));
+document.addEventListener("pointerdown", (event) => {
+  if (!event.target.closest(".view-control")) {
+    viewMenu.hidden = true;
+    viewToggle?.setAttribute("aria-expanded", "false");
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && viewToggle?.getAttribute("aria-expanded") === "true") {
+    viewMenu.hidden = true;
+    viewToggle.setAttribute("aria-expanded", "false");
+    viewToggle.focus();
+  }
+});
+
 // The hint goes away once the person finds the menu, or after a while.
 const hint = document.getElementById("hint");
 const dismissHint = () => hint?.classList.add("is-done");

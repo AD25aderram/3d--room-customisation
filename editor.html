@@ -40,6 +40,15 @@
         <button type="button" class="btn btn--quiet btn--small" id="reset-view">Reset view</button>
     </header>
 
+    <div class="view-control">
+        <button type="button" class="btn btn--quiet btn--small" id="view-menu-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="view-menu">View</button>
+        <div class="view-menu" id="view-menu" role="menu" aria-label="Camera view" hidden>
+            <button type="button" role="menuitemradio" aria-checked="false" data-camera-view="room">Room view</button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-camera-view="top">Top view</button>
+            <button type="button" role="menuitemradio" aria-checked="false" data-camera-view="eye">Eye level</button>
+        </div>
+    </div>
+
     <div id="scene-container"></div>
 
     <p class="hint" id="hint">Right-click or double-click a piece to move, rotate, resize or remove it. Drag to look around, scroll to zoom.</p>

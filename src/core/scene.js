@@ -3,6 +3,8 @@ import {
   DirectionalLightHelper, GridHelper, HemisphereLight, PCFSoftShadowMap,
   PerspectiveCamera, PMREMGenerator, Scene, WebGLRenderer,
 } from "three";
+
+
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { SHOW_HELPERS } from "../config.js";
@@ -21,6 +23,7 @@ export function createScene(container, room) {
   container.append(renderer.domElement);
 
   const scene = new Scene();
+  // Environment mapping
   const pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environmentIntensity = 0.55;
