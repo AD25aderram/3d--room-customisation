@@ -10,6 +10,7 @@ import { installPlacementPreview } from "./interaction/placementPreview.js";
 import { installContextMenu } from "./interaction/contextMenu.js";
 import { buildAddMenu } from "./ui/addMenu.js";
 import { showMessage } from "./ui/toast.js";
+import { createBehaviorHistory } from "./undo/behaviorCatalog.js";
 
 const container = document.getElementById("scene-container");
 const room = loadRoom();
@@ -50,9 +51,20 @@ updateMeta();
 
 const store = createFurnitureStore(updateMeta);
 const furniture = store.items;
+const undoButton = document.getElementById("undo-action");
+const history = createBehaviorHistory({
+  scene,
+  store,
+  onChange: (canUndo, latestLabel) => {
+    if (!undoButton) return;
+    undoButton.disabled = !canUndo;
+    undoButton.title = canUndo ? `Undo ${latestLabel}` : "Nothing to undo";
+  },
+});
+undoButton?.addEventListener("click", () => history.undo());
 
 const placementPreview = installPlacementPreview({
-  renderer, camera, orbit, scene, furniture, room: collisionRoom, store,
+  renderer, camera, orbit, scene, furniture, room: collisionRoom, store, history,
 });
 
 async function addFurniture(entry) {
@@ -95,9 +107,9 @@ async function importFurniture(file, addEntry) {
 }
 
 buildAddMenu(CATALOG, addFurniture, importFurniture);
-const drag = installDrag({ renderer, camera, orbit, scene, furniture, room: collisionRoom });
+const drag = installDrag({ renderer, camera, orbit, furniture, room: collisionRoom, history });
 installHover({ renderer, scene, drag, isPlacementActive: placementPreview.isActive });
-installContextMenu({ renderer, furniture, scene, drag, store, room: collisionRoom });
+installContextMenu({ renderer, furniture, scene, drag, store, room: collisionRoom, history });
 
 // "Reset view" returns the camera to where it started.
 const home = { position: camera.position.clone(), target: orbit.target.clone() };

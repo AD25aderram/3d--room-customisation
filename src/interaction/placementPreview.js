@@ -4,7 +4,7 @@ import { findFreeSpot } from "../furniture/placement.js";
 import { showMessage } from "../ui/toast.js";
 
 /** Previews new furniture as a floor footprint until the user confirms or cancels. */
-export function installPlacementPreview({ renderer, camera, orbit, scene, furniture, room, store }) {
+export function installPlacementPreview({ renderer, camera, orbit, scene, furniture, room, store, history }) {
   const raycaster = new Raycaster();
   const pointer = new Vector2();
   const floorPlane = new Plane(new Vector3(0, 1, 0), 0);
@@ -122,7 +122,9 @@ export function installPlacementPreview({ renderer, camera, orbit, scene, furnit
 
     if (confirmed) {
       scene.add(pivot);
+      const index = furniture.length;
       store.add(pivot);
+      history.record("furniture.place", { item: pivot, index });
     }
   }
 

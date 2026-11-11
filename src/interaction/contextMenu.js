@@ -3,7 +3,7 @@ import { nudgeToFree } from "../physics/collision.js";
 import { showMessage } from "../ui/toast.js";
 
 /** Installs the furniture Move/Rotate/Resize/Remove menu and returns its DOM element. */
-export function installContextMenu({ renderer, furniture, scene, drag, store, room }) {
+export function installContextMenu({ renderer, furniture, scene, drag, store, room, history }) {
   let target = null;
 
   const menu = document.createElement("div");
@@ -55,6 +55,12 @@ export function installContextMenu({ renderer, furniture, scene, drag, store, ro
       item.rotation.y = oldRot;
       item.position.set(oldX, 0, oldZ);
       showMessage("No space to rotate here");
+    } else {
+      history?.record("furniture.rotate", {
+        item,
+        from: { rotation: oldRot, x: oldX, z: oldZ },
+        to: { rotation: item.rotation.y, x: item.position.x, z: item.position.z },
+      });
     }
   }
 
@@ -62,8 +68,10 @@ export function installContextMenu({ renderer, furniture, scene, drag, store, ro
   addItem("Rotate 90°", "R", rotate);
   addItem("Resize…", "", (item, _event, bounds) => openDimensionDialog(item, bounds.left, bounds.top));
   addItem("Remove", "", (item) => {
+    const index = furniture.indexOf(item);
     scene.remove(item);
     store.remove(item);
+    history?.record("furniture.remove", { item, index });
     showMessage(`${item.userData.entry?.label ?? "Item"} removed`);
   }, "danger");
   document.body.append(menu);
@@ -132,9 +140,15 @@ export function installContextMenu({ renderer, furniture, scene, drag, store, ro
         return;
       }
 
+      const oldScale = { x: item.scale.x, y: item.scale.y, z: item.scale.z };
       item.scale.x *= dimensions[0] / size.x;
       item.scale.y *= dimensions[1] / size.y;
       item.scale.z *= dimensions[2] / size.z;
+      history?.record("furniture.resize", {
+        item,
+        from: oldScale,
+        to: { x: item.scale.x, y: item.scale.y, z: item.scale.z },
+      });
       delete item.userData.fp;
       closeDialog();
     });

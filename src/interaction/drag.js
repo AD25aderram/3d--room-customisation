@@ -3,7 +3,7 @@ import { moveWithCollision, nudgeToFree } from "../physics/collision.js";
 import { showMessage } from "../ui/toast.js";
 
 /** Installs floor dragging, click/key drop, and R rotation controls; distances use scene units. */
-export function installDrag({ renderer, camera, orbit, furniture, room }) {
+export function installDrag({ renderer, camera, orbit, furniture, room, history }) {
   const raycaster = new Raycaster();
   const pointer = new Vector2();
   const floorPlane = new Plane(new Vector3(0, 1, 0), 0);
@@ -11,6 +11,7 @@ export function installDrag({ renderer, camera, orbit, furniture, room }) {
   const dragOffset = new Vector3();
   let dragging = false;
   let activeItem = null;
+  let movementStart = null;
 
   function setPointer(event) {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -29,16 +30,27 @@ export function installDrag({ renderer, camera, orbit, furniture, room }) {
     setPointer(event);
     if (!raycaster.ray.intersectPlane(floorPlane, hitPoint)) return;
     activeItem = item;
+    movementStart = { x: item.position.x, z: item.position.z };
     dragging = true;
     orbit.enabled = false;
     renderer.domElement.style.cursor = "grabbing";
     dragOffset.copy(hitPoint).sub(item.position);
     showMessage("Click to drop it here. Press R to rotate.");
   }
+  function commitMovement() {
+    if (!activeItem || !movementStart) return;
+    const to = { x: activeItem.position.x, z: activeItem.position.z };
+    if (Math.abs(to.x - movementStart.x) > 1e-5 || Math.abs(to.z - movementStart.z) > 1e-5) {
+      history?.record("furniture.move", { item: activeItem, from: movementStart, to });
+    }
+    movementStart = to;
+  }
   function stopDrag() {
     if (!dragging) return;
+    commitMovement();
     dragging = false;
     activeItem = null;
+    movementStart = null;
     orbit.enabled = true;
     renderer.domElement.style.cursor = "auto";
   }
@@ -61,6 +73,7 @@ export function installDrag({ renderer, camera, orbit, furniture, room }) {
     if (!dragging) return;
     if (event.key.toLowerCase() === "r" && !event.ctrlKey && !event.metaKey) {
       if (event.repeat) return;
+      commitMovement();
       const oldRot = activeItem.rotation.y;
       const oldX = activeItem.position.x;
       const oldZ = activeItem.position.z;
@@ -69,6 +82,13 @@ export function installDrag({ renderer, camera, orbit, furniture, room }) {
         activeItem.rotation.y = oldRot;
         activeItem.position.set(oldX, 0, oldZ);
         showMessage("No space to rotate here");
+      } else {
+        history?.record("furniture.rotate", {
+          item: activeItem,
+          from: { rotation: oldRot, x: oldX, z: oldZ },
+          to: { rotation: activeItem.rotation.y, x: activeItem.position.x, z: activeItem.position.z },
+        });
+        movementStart = { x: activeItem.position.x, z: activeItem.position.z };
       }
       return;
     }
