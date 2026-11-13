@@ -88,6 +88,12 @@ export function installContextMenu({ renderer, furniture, scene, drag, store, ro
     title.textContent = "Resize";
     dialog.append(title);
 
+    const parseDimension = (rawValue) => {
+      const normalized = String(rawValue).trim().replace(/,/g, ".");
+      const parsed = Number.parseFloat(normalized);
+      return Number.isFinite(parsed) ? parsed : NaN;
+    };
+
     const inputs = [
       ["Width", size.x],
       ["Height", size.y],
@@ -96,11 +102,10 @@ export function installContextMenu({ renderer, furniture, scene, drag, store, ro
       const row = document.createElement("label");
       row.textContent = `${label} (m)`;
       const input = document.createElement("input");
-      input.type = "number";
-      input.min = "0.001";
-      input.step = "0.01";
-      input.required = true;
-      input.value = value.toFixed(2);
+      input.type = "text";
+      input.inputMode = "decimal";
+      input.placeholder = "0.00";
+      input.value = Number(value).toFixed(2);
       row.append(input);
       dialog.append(row);
       return input;
@@ -134,7 +139,7 @@ export function installContextMenu({ renderer, furniture, scene, drag, store, ro
     });
     dialog.addEventListener("submit", (event) => {
       event.preventDefault();
-      const dimensions = inputs.map((input) => Number(input.value));
+      const dimensions = inputs.map((input) => parseDimension(input.value));
       if (dimensions.some((value) => !Number.isFinite(value) || value <= 0)) {
         error.textContent = "Enter sizes greater than 0.";
         return;

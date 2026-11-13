@@ -153,7 +153,7 @@ export function installPlacementPreview({ renderer, camera, orbit, scene, furnit
     }
     orbit.enabled = false;
     renderer.domElement.style.cursor = "crosshair";
-    showMessage("Move the outline. Right-click to place; left-click to cancel.");
+    showMessage("Move the outline. Left-click to place; right-click to cancel.");
     return true;
   }
 
@@ -163,14 +163,14 @@ export function installPlacementPreview({ renderer, camera, orbit, scene, furnit
     if (event.button === 0) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      finish(false);
+      finish(true);
     }
   }, true);
   renderer.domElement.addEventListener("contextmenu", (event) => {
     if (!active) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    finish(true);
+    finish(false);
   }, true);
   window.addEventListener("keydown", (event) => {
     if (active && event.key === "Escape") finish(false);
