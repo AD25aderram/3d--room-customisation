@@ -16,7 +16,7 @@ Dependencies flow from core room and physics utilities toward furniture; interac
 
 ## Adding furniture
 
-Add one object to the plain `CATALOG` array in `src/furniture/catalog.js`. Provide a unique `id`, the displayed `label`, a model `path`, and either a target `width` or `height` in scene units. The Add menu and loader consume the entry automatically. Keep model paths valid relative to the page URL, as with the existing entries.
+The furniture picker builds its searchable categories from `MODEL_GROUPS` in `src/furniture/catalog.js`. Add each model filename to its category's `files` list and set a target `width` or `height` in scene units for the group. Model paths are URL-encoded and resolved relative to the editor page. The loader supports the Draco-compressed catalog models.
 
 ## SEO and deployment
 
@@ -27,3 +27,4 @@ Add one object to the plain `CATALOG` array in `src/furniture/catalog.js`. Provi
 - The fallback path assumes room builders provide a non-empty `userData.outline`; malformed room geometry can still fail while bounds are calculated.
 - `canvas.js` retains its original drawing and session storage flow, including its console logging.
 - The GLTF catalog paths use `../models/...` as in the existing app; their resolution depends on the static server's page URL layout.
+gltf-transform optimize input.glb output.glb --compress draco --texture-compress webp

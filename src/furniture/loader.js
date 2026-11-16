@@ -1,7 +1,11 @@
 import { Box3, Group, Vector3 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
 const loader = new GLTFLoader();
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/libs/draco/");
+loader.setDRACOLoader(dracoLoader);
 const modelCache = new Map();
 const importedModelCache = new WeakMap();
 
