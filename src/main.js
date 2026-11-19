@@ -69,6 +69,7 @@ const placementPreview = installPlacementPreview({
 });
 const arButton = document.getElementById("start-ar");
 const arInstructions = document.getElementById("ar-instructions");
+let previousDockCollapsed;
 const arPlacement = createARPlacement({
   renderer,
   scene,
@@ -79,6 +80,14 @@ const arPlacement = createARPlacement({
     arButton.textContent = active ? "Exit AR" : "Start AR";
     arInstructions.hidden = !active;
     document.body.classList.toggle("is-ar", active);
+    const dock = document.querySelector(".dock");
+    if (active && dock) {
+      previousDockCollapsed = dock.classList.contains("is-collapsed");
+      dock.classList.add("is-collapsed");
+    } else if (previousDockCollapsed !== undefined && dock) {
+      dock.classList.toggle("is-collapsed", previousDockCollapsed);
+      previousDockCollapsed = undefined;
+    }
   },
 });
 

@@ -35,6 +35,22 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 .ar-instructions[hidden] { display: none; }
 .is-ar .view-control, .is-ar #hint { display: none; }
 body.is-ar, body.is-ar #scene-container { background: transparent; }
+.ar-object-tools {
+  position: fixed; top: 112px; left: 50%; z-index: 20;
+  width: min(460px, calc(100% - 16px)); padding: 10px;
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: rgba(248, 247, 244, 0.96); box-shadow: var(--shadow-2);
+  transform: translateX(-50%);
+}
+.ar-object-tools[hidden] { display: none; }
+.ar-object-tools__label { margin: 0 0 8px; font-size: 0.875rem; text-align: center; }
+.ar-object-tools__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.ar-object-tools .is-danger { color: var(--danger); }
+.ar-resize-dialog {
+  top: 50%; left: 50%; z-index: 25;
+  width: min(280px, calc(100% - 24px));
+  transform: translate(-50%, -50%);
+}
 .view-menu {
   position: absolute; top: calc(100% + 10px); left: 50%; z-index: 2147483647;
   width: 160px; padding: 6px;
@@ -68,8 +84,8 @@ body.is-ar, body.is-ar #scene-container { background: transparent; }
   border: 0; background: none; color: var(--ink);
   font: 700 1.05rem var(--font-display); letter-spacing: -0.02em; text-align: left; cursor: pointer;
 }
-.dock-head::after { content: "–"; color: var(--ink-soft); font-family: var(--font-ui); }
-.dock.is-collapsed .dock-head::after { content: "+"; }
+.dock-head::after { content: "Hide"; color: var(--pine); font: 600 0.78rem var(--font-ui); }
+.dock.is-collapsed .dock-head::after { content: "Show"; }
 .dock-count {
   margin-left: auto; padding: 3px 8px; border-radius: 999px;
   background: var(--plaster); color: var(--ink-soft);
@@ -186,6 +202,7 @@ body.is-ar, body.is-ar #scene-container { background: transparent; }
   .topbar .btn { padding-right: 0.65rem; padding-left: 0.65rem; }
   .view-control { top: 10px; }
   .ar-instructions { top: 58px; border-radius: var(--r-md); }
+  .ar-object-tools { top: 106px; }
   .topbar .meta { display: none; }
   .dock { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 52vh; }
   .dock-head { padding: 12px 14px 10px; }
