@@ -18,6 +18,10 @@ Dependencies flow from core room and physics utilities toward furniture; interac
 
 The furniture picker builds its searchable categories from `MODEL_GROUPS` in `src/furniture/catalog.js`. Add each model filename to its category's `files` list and set a target `width` or `height` in scene units for the group. Model paths are URL-encoded and resolved relative to the editor page. The loader supports the Draco-compressed catalog models.
 
+## Android AR preview
+
+On a supported Android phone, the homepage offers an AR preview link when the browser reports `immersive-ar` support. Open the editor, tap **Start AR**, allow camera access, choose a catalog model, aim at a floor, and tap to place it. The preview requires a secure HTTPS origin, Android Chrome/WebXR support for hit testing and DOM overlays, and a compatible ARCore device. AR placements are temporary and are cleared when the AR session ends.
+
 ## SEO and deployment
 
 `index.html` is the public landing page. The preset, drawing, and editor pages are marked `noindex`; `robots.txt` allows crawlers to read those directives. The canonical URL, social metadata, `robots.txt`, and `sitemap.xml` use the production URL `https://floorplot.vercel.app/`. The 1200 × 630 social preview image is `og-image.png`.

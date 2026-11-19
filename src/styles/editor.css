@@ -24,6 +24,17 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
   transform: translateX(-50%);
 }
 .topbar .meta { color: var(--ink-soft); font-size: 0.875rem; white-space: nowrap; }
+.ar-instructions {
+  position: fixed; top: 72px; left: 50%; z-index: 10;
+  max-width: min(520px, calc(100% - 32px)); margin: 0; padding: 10px 16px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: rgba(248, 247, 244, 0.94); color: var(--ink);
+  box-shadow: var(--shadow-1); font-size: 0.875rem; text-align: center;
+  transform: translateX(-50%);
+}
+.ar-instructions[hidden] { display: none; }
+.is-ar .view-control, .is-ar #hint { display: none; }
+body.is-ar, body.is-ar #scene-container { background: transparent; }
 .view-menu {
   position: absolute; top: calc(100% + 10px); left: 50%; z-index: 2147483647;
   width: 160px; padding: 6px;
@@ -171,8 +182,10 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 
 /* Phones: furniture becomes a bottom strip */
 @media (max-width: 720px) {
-  .topbar { top: 10px; left: 10px; }
+  .topbar { top: 10px; left: 10px; gap: 6px; padding: 6px 8px; }
+  .topbar .btn { padding-right: 0.65rem; padding-left: 0.65rem; }
   .view-control { top: 10px; }
+  .ar-instructions { top: 58px; border-radius: var(--r-md); }
   .topbar .meta { display: none; }
   .dock { top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; max-height: 52vh; }
   .dock-head { padding: 12px 14px 10px; }

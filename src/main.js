@@ -7,6 +7,7 @@ import { updateWallVisibility } from "./room/wallVisibility.js";
 import { installDrag } from "./interaction/drag.js";
 import { installHover } from "./interaction/hover.js";
 import { installPlacementPreview } from "./interaction/placementPreview.js";
+import { createARPlacement } from "./interaction/arPlacement.js";
 import { installContextMenu } from "./interaction/contextMenu.js";
 import { buildAddMenu } from "./ui/addMenu.js";
 import { showMessage } from "./ui/toast.js";
@@ -66,13 +67,54 @@ undoButton?.addEventListener("click", () => history.undo());
 const placementPreview = installPlacementPreview({
   renderer, camera, orbit, scene, furniture, room: collisionRoom, store, history,
 });
+const arButton = document.getElementById("start-ar");
+const arInstructions = document.getElementById("ar-instructions");
+const arPlacement = createARPlacement({
+  renderer,
+  scene,
+  room,
+  furniture,
+  orbit,
+  onStateChange(active) {
+    arButton.textContent = active ? "Exit AR" : "Start AR";
+    arInstructions.hidden = !active;
+    document.body.classList.toggle("is-ar", active);
+  },
+});
+
+arPlacement.isSupported().then((supported) => {
+  arButton.hidden = !supported;
+  if (supported && new URLSearchParams(window.location.search).has("startAR")) {
+    showMessage("Tap Start AR to open the camera, then choose a furniture model.");
+  }
+}).catch((error) => {
+  console.warn("Could not check WebXR AR support:", error);
+  arButton.hidden = true;
+});
+arButton.addEventListener("click", async () => {
+  try {
+    if (arPlacement.isActive()) {
+      await arPlacement.end();
+    } else {
+      placementPreview.cancel();
+      await arPlacement.start();
+    }
+  } catch (error) {
+    console.error("Could not start or stop AR:", error);
+    showMessage("AR could not start. Use Android Chrome over HTTPS and allow camera access.");
+  }
+});
 
 async function addFurniture(entry) {
   try {
     const pivot = entry.file
       ? await buildFurnitureFromFile(entry.file, entry)
       : await buildFurniture(entry);
-    placementPreview.begin(pivot, entry);
+    if (arPlacement.isActive()) {
+      arPlacement.select(pivot);
+    } else {
+      placementPreview.begin(pivot, entry);
+    }
   } catch (error) {
     console.error(`Failed to load ${entry.label}:`, error);
     showMessage(`Could not load ${entry.label}`);
@@ -99,7 +141,11 @@ async function importFurniture(file, addEntry) {
   try {
     const pivot = await buildFurnitureFromFile(file, entry);
     addEntry(entry);
-    placementPreview.begin(pivot, entry);
+    if (arPlacement.isActive()) {
+      arPlacement.select(pivot);
+    } else {
+      placementPreview.begin(pivot, entry);
+    }
   } catch (error) {
     console.error(`Failed to load ${file.name}:`, error);
     showMessage(`Could not load ${file.name}`);
@@ -175,13 +221,13 @@ renderer.domElement.addEventListener("contextmenu", dismissHint, { once: true })
 renderer.domElement.addEventListener("dblclick", dismissHint, { once: true });
 setTimeout(dismissHint, 20000);
 
-function animate() {
-  requestAnimationFrame(animate);
+function animate(_time, frame) {
+  arPlacement.update(frame);
   updateWallVisibility(room, camera);
   orbit.update();
   renderer.render(scene, camera);
 }
-animate();
+renderer.setAnimationLoop(animate);
 window.addEventListener("resize", () => {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();

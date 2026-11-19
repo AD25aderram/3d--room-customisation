@@ -179,5 +179,5 @@ export function installPlacementPreview({ renderer, camera, orbit, scene, furnit
     if (active) finish(false);
   });
 
-  return { begin, isActive: () => Boolean(active) };
+  return { begin, cancel: () => finish(false), isActive: () => Boolean(active) };
 }

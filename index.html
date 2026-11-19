@@ -62,6 +62,7 @@
         .lede { max-width: 30rem; margin: 0 0 2.25rem; color: var(--ink-soft); font-size: 1.15rem; }
         .start { display: grid; gap: 12px; max-width: 30rem; }
         .start-card { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: center; padding: 16px 18px; color: var(--ink); text-decoration: none; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper); transition: border-color .15s, transform .15s, box-shadow .15s; }
+        .start-card[hidden] { display: none; }
         .start-card:hover { border-color: var(--pine); transform: translateY(-2px); box-shadow: var(--shadow-1); }
         .start-card--primary { background: var(--pine); border-color: var(--pine); color: #fff; }
         .start-card--primary:hover { background: var(--pine-deep); }
@@ -182,6 +183,12 @@
                                 <svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 5h12v8h6v10H5z"/><circle cx="5" cy="5" r="1.6" fill="currentColor"/><circle cx="17" cy="5" r="1.6" fill="currentColor"/><circle cx="23" cy="23" r="1.6" fill="currentColor"/></svg>
                             </span>
                             <span><span class="start-title">Draw your own room</span><span class="start-sub">Trace the outline corner by corner and mark any pillars.</span></span>
+                        </a>
+                        <a class="start-card" id="ar-preview-link" href="editor.html?startAR=1" hidden>
+                            <span class="start-icon" aria-hidden="true">
+                                <svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 3 24 8.5v11L14 25 4 19.5v-11z"/><path d="M14 14v11M4 8.5l10 5.5 10-5.5"/><circle cx="14" cy="14" r="2.2"/></svg>
+                            </span>
+                            <span><span class="start-title">Try furniture in AR</span><span class="start-sub">Android phone · open the editor, then tap Start AR.</span></span>
                         </a>
                     </nav>
                 </div>
@@ -371,6 +378,16 @@
             window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Message about Floorplot")}&body=${encodeURIComponent(body)}`;
             document.getElementById("form-status").textContent = `Your email app should open with the message ready. If it doesn't, write to ${CONTACT_EMAIL}.`;
         });
+
+        const arPreviewLink = document.getElementById("ar-preview-link");
+        const isAndroidPhone = /Android/i.test(navigator.userAgent) && /Mobile/i.test(navigator.userAgent);
+        if (isAndroidPhone && window.isSecureContext && navigator.xr?.isSessionSupported) {
+            navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
+                arPreviewLink.hidden = !supported;
+            }).catch(() => {
+                arPreviewLink.hidden = true;
+            });
+        }
     </script>
 </body>
 </html>
