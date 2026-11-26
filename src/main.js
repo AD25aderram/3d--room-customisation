@@ -222,7 +222,11 @@ document.addEventListener("keydown", (event) => {
     viewToggle.focus();
   }
 });
-
+document.addEventListener("beforexrselect", (event) => {
+  if (event.target.closest(".topbar, .dock, .ar-object-tools, .ar-resize-dialog")) {
+    event.preventDefault();
+  }
+});
 // The hint goes away once the person finds the menu, or after a while.
 const hint = document.getElementById("hint");
 const dismissHint = () => hint?.classList.add("is-done");
