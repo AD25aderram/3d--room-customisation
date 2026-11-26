@@ -6,6 +6,7 @@ import { showMessage } from "../ui/toast.js";
 
 const isAndroidPhone = () =>
   /Android/i.test(navigator.userAgent) && /Mobile/i.test(navigator.userAgent);
+const MIN_FLOOR_NORMAL_Y = Math.cos(20 * Math.PI / 180);
 
 export function createARPlacement({ renderer, scene, room, furniture, orbit, onStateChange }) {
   renderer.xr.enabled = true;
@@ -14,9 +15,12 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
   furnitureGroup.visible = false;
   scene.add(furnitureGroup);
 
+  const reticleMaterial = new MeshBasicMaterial({
+    color: 0x20a464, side: DoubleSide, depthTest: false,
+  });
   const reticle = new Mesh(
-    new RingGeometry(0.08, 0.12, 32),
-    new MeshBasicMaterial({ color: 0x20a464, side: DoubleSide, depthTest: false }),
+    new RingGeometry(0.08, 0.12, 32).rotateX(-Math.PI / 2),
+    reticleMaterial,
   );
   reticle.matrixAutoUpdate = false;
   reticle.renderOrder = 2;
@@ -58,7 +62,8 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
   let movingItem = null;
   let moveStart = null;
   let resizeDialog = null;
-  let hasHit = false;
+  let currentHit = null;
+  let hasValidHit = false;
   let previousRoomVisibility = true;
   let previousFurnitureVisibility = [];
   let previousOrbitEnabled = true;
@@ -69,6 +74,45 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
   const rayDirection = new Vector3(0, 0, -1);
   const rayRotation = new Quaternion();
   const hitPosition = new Vector3();
+  const surfaceNormal = new Vector3(0, 1, 0);
+  const hitRotation = new Quaternion();
+  const itemAnchors = new Map();
+  const anchorRequests = new Map();
+
+  function clearAnchor(item) {
+    const anchor = itemAnchors.get(item);
+    if (anchor) anchor.delete();
+    itemAnchors.delete(item);
+    anchorRequests.set(item, (anchorRequests.get(item) ?? 0) + 1);
+  }
+
+  function anchorAtHit(item, hit) {
+    clearAnchor(item);
+    if (typeof hit?.createAnchor !== "function") return;
+
+    const version = anchorRequests.get(item);
+    const anchorSession = session;
+    let anchorPromise;
+    try {
+      anchorPromise = hit.createAnchor();
+    } catch (error) {
+      console.warn("Could not anchor the AR furniture; keeping its tracked position:", error);
+      return;
+    }
+
+    Promise.resolve(anchorPromise)
+      .then((anchor) => {
+        if (session !== anchorSession || !placedItems.has(item) ||
+            anchorRequests.get(item) !== version) {
+          anchor.delete();
+          return;
+        }
+        itemAnchors.set(item, anchor);
+      })
+      .catch((error) => {
+        console.warn("Could not anchor the AR furniture; keeping its tracked position:", error);
+      });
+  }
 
   function updateTools() {
     const item = movingItem ?? selectedItem;
@@ -184,13 +228,15 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
   function placeOrSelect() {
     if (!session) return;
     if (movingItem) {
-      if (!hasHit) {
-        showMessage("Aim at a floor, then tap to drop the model.");
+      if (!hasValidHit) {
+        showMessage("Aim at a level floor surface, then tap to drop the model.");
         return;
       }
+      const item = movingItem;
       selectedItem = movingItem;
       movingItem = null;
       moveStart = null;
+      anchorAtHit(item, currentHit);
       reticle.visible = false;
       updateTools();
       showMessage("Model moved.");
@@ -198,13 +244,14 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
     }
 
     if (preview) {
-      if (!hasHit) {
-        showMessage("Aim your camera at a floor to place furniture.");
+      if (!hasValidHit) {
+        showMessage("Aim at a level floor surface to place furniture.");
         return;
       }
       preview.visible = true;
       preview.userData.isARPlaced = true;
       placedItems.add(preview);
+      anchorAtHit(preview, currentHit);
       selectedItem = preview;
       preview = null;
       reticle.visible = false;
@@ -225,6 +272,11 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
     selectedItem = null;
     movingItem = null;
     moveStart = null;
+    for (const anchor of itemAnchors.values()) anchor.delete();
+    itemAnchors.clear();
+    anchorRequests.clear();
+    currentHit = null;
+    hasValidHit = false;
     placedItems.clear();
     closeResizeDialog();
     tools.hidden = true;
@@ -266,6 +318,7 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
   });
   deleteButton.addEventListener("click", () => {
     if (!selectedItem) return;
+    clearAnchor(selectedItem);
     placedItems.delete(selectedItem);
     selectedItem.removeFromParent();
     selectedItem = null;
@@ -294,6 +347,7 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
 
       const requestedSession = await navigator.xr.requestSession("immersive-ar", {
         requiredFeatures: ["hit-test", "dom-overlay"],
+        optionalFeatures: ["anchors"],
         domOverlay: { root: document.body },
       });
 
@@ -339,39 +393,62 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
       preview?.removeFromParent();
       selectedItem = null;
       preview = model;
-      preview.visible = hasHit;
+      preview.visible = hasValidHit;
       furnitureGroup.add(preview);
       updateTools();
-      showMessage("Aim at the floor, then tap to place.");
+      showMessage("Aim at a level floor surface, then tap to place.");
       return true;
     },
 
     update(frame) {
       if (!session || !frame || !hitTestSource || !localSpace) return;
 
+      for (const [item, anchor] of itemAnchors) {
+        if (item === movingItem) continue;
+        const anchorPose = frame.getPose(anchor.anchorSpace, localSpace);
+        if (anchorPose) {
+          item.position.set(
+            anchorPose.transform.position.x,
+            anchorPose.transform.position.y,
+            anchorPose.transform.position.z,
+          );
+        }
+      }
+
       const hit = frame.getHitTestResults(hitTestSource)[0];
       const pose = hit?.getPose(localSpace);
       if (!pose) {
-        hasHit = false;
+        currentHit = null;
+        hasValidHit = false;
         reticle.visible = false;
         if (preview) preview.visible = false;
         return;
       }
 
-      hasHit = true;
+      currentHit = hit;
       hitPosition.set(
         pose.transform.position.x,
         pose.transform.position.y,
         pose.transform.position.z,
       );
+      hitRotation.set(
+        pose.transform.orientation.x,
+        pose.transform.orientation.y,
+        pose.transform.orientation.z,
+        pose.transform.orientation.w,
+      );
+      surfaceNormal.set(0, 1, 0).applyQuaternion(hitRotation);
+      hasValidHit = surfaceNormal.y >= MIN_FLOOR_NORMAL_Y;
       reticle.matrix.fromArray(pose.transform.matrix);
       reticle.matrixWorldNeedsUpdate = true;
+      reticleMaterial.color.set(hasValidHit ? 0x20a464 : 0xe5484d);
       reticle.visible = Boolean(preview || movingItem);
-      if (preview) {
+      if (preview && hasValidHit) {
         preview.position.copy(hitPosition);
         preview.visible = true;
       }
-      if (movingItem) movingItem.position.copy(hitPosition);
+      if (preview && !hasValidHit) preview.visible = false;
+      if (movingItem && hasValidHit) movingItem.position.copy(hitPosition);
     },
   };
 }

@@ -35,6 +35,15 @@ html, body { height: 100%; margin: 0; overflow: hidden; }
 .ar-instructions[hidden] { display: none; }
 .is-ar .view-control, .is-ar #hint { display: none; }
 body.is-ar, body.is-ar #scene-container { background: transparent; }
+.ar-launch-screen {
+  position: fixed; inset: 0; z-index: 2147483647;
+  display: grid; align-content: center; justify-items: center; gap: 1rem;
+  padding: 24px; background: var(--paper); color: var(--ink); text-align: center;
+}
+.ar-launch-screen[hidden] { display: none; }
+.ar-launch-screen p { margin: 0; }
+.ar-launch-screen a { color: var(--pine); }
+body.is-ar-launch > :not(#ar-launch-screen) { visibility: hidden; }
 .ar-object-tools {
   position: fixed; top: 112px; left: 50%; z-index: 20;
   width: min(460px, calc(100% - 16px)); padding: 10px;
