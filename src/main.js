@@ -67,8 +67,12 @@ undoButton?.addEventListener("click", () => history.undo());
 const placementPreview = installPlacementPreview({
   renderer, camera, orbit, scene, furniture, room: collisionRoom, store, history,
 });
-const arButton = document.getElementById("start-ar");
+const exitArButton = document.getElementById("exit-ar");
 const arInstructions = document.getElementById("ar-instructions");
+const arLaunchScreen = document.getElementById("ar-launch-screen");
+const arLaunchMessage = document.getElementById("ar-launch-message");
+const arLaunchRetry = document.getElementById("ar-launch-retry");
+const shouldAutoStartAR = new URLSearchParams(window.location.search).has("startAR");
 let previousDockCollapsed;
 const arPlacement = createARPlacement({
   renderer,
@@ -77,9 +81,13 @@ const arPlacement = createARPlacement({
   furniture,
   orbit,
   onStateChange(active) {
-    arButton.textContent = active ? "Exit AR" : "Start AR";
+    exitArButton.hidden = !active;
     arInstructions.hidden = !active;
     document.body.classList.toggle("is-ar", active);
+    if (active) {
+      document.body.classList.remove("is-ar-launch");
+      arLaunchScreen.hidden = true;
+    }
     const dock = document.querySelector(".dock");
     if (active && dock) {
       previousDockCollapsed = dock.classList.contains("is-collapsed");
@@ -91,28 +99,43 @@ const arPlacement = createARPlacement({
   },
 });
 
-arPlacement.isSupported().then((supported) => {
-  arButton.hidden = !supported;
-  if (supported && new URLSearchParams(window.location.search).has("startAR")) {
-    showMessage("Tap Start AR to open the camera, then choose a furniture model.");
-  }
-}).catch((error) => {
-  console.warn("Could not check WebXR AR support:", error);
-  arButton.hidden = true;
-});
-arButton.addEventListener("click", async () => {
+let arLaunchPending = false;
+async function launchAR(isAutomatic = false) {
+  if (arLaunchPending) return;
+  arLaunchPending = true;
+  arLaunchRetry.disabled = true;
+  arLaunchMessage.textContent = "Starting AR…";
   try {
-    if (arPlacement.isActive()) {
-      await arPlacement.end();
-    } else {
-      placementPreview.cancel();
-      await arPlacement.start();
-    }
+    placementPreview.cancel();
+    await arPlacement.start();
+    showMessage("AR started. Choose a model and aim at a level floor surface.");
   } catch (error) {
-    console.error("Could not start or stop AR:", error);
-    showMessage("AR could not start. Use Android Chrome over HTTPS and allow camera access.");
+    console.error("Could not start AR:", error);
+    arLaunchMessage.textContent = isAutomatic
+      ? "Your browser needs a tap to start AR. Tap below to continue."
+      : "AR could not start. Check device support, HTTPS, and camera permission.";
+    arLaunchRetry.hidden = false;
+    arLaunchRetry.disabled = false;
+  } finally {
+    arLaunchPending = false;
+  }
+}
+
+exitArButton.addEventListener("click", async () => {
+  try {
+    await arPlacement.end();
+  } catch (error) {
+    console.error("Could not stop the AR session:", error);
+    showMessage("Could not close the AR session.");
   }
 });
+arLaunchRetry.addEventListener("click", () => launchAR());
+
+if (shouldAutoStartAR) {
+  document.body.classList.add("is-ar-launch");
+  arLaunchScreen.hidden = false;
+  void launchAR(true);
+}
 
 async function addFurniture(entry) {
   try {
