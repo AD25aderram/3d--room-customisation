@@ -280,7 +280,6 @@ export function createARPlacement({ renderer, scene, room, furniture, orbit, onS
     placedItems.clear();
     closeResizeDialog();
     tools.hidden = true;
-    hasHit = false;
     furnitureGroup.clear();
     furnitureGroup.visible = false;
     reticle.visible = false;

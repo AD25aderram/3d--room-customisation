@@ -2,7 +2,7 @@
 
 ## ES module layout
 
-- `src/main.js` wires the app modules together
+- `src/main.js` wires the app modules together.
 - `src/config.js` contains placement and display settings.
 - `src/core/` creates the renderer, camera, controls, lights, and helpers.
 - `src/room/` loads drawn or default rooms and updates wall visibility. `src/custom_model.js` builds rooms drawn on the canvas page.
